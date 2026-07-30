@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yukti — Pitch Deck</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#000;color:#fff;overflow:hidden;height:100vh;width:100vw;-webkit-font-smoothing:antialiased}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:6vh 8vw;opacity:0;transform:translateY(12px);transition:opacity .4s ease,transform .4s ease;pointer-events:none}
+.slide.active{opacity:1;transform:translateY(0);pointer-events:all}
+h1{font-size:clamp(2rem,4.8vw,4.2rem);font-weight:800;line-height:1.08;letter-spacing:-.04em;margin-bottom:1.2rem}
+h2{font-size:clamp(1.3rem,2.5vw,2rem);font-weight:700;line-height:1.2;letter-spacing:-.02em;margin-bottom:1rem}
+h3{font-size:clamp(1rem,1.5vw,1.25rem);font-weight:600;margin-bottom:.6rem}
+p,li{font-size:clamp(.82rem,1.15vw,1.05rem);line-height:1.6;color:#aaa}
+.sub{font-size:clamp(.95rem,1.6vw,1.3rem);color:#666;font-weight:400;line-height:1.5;margin-bottom:1.5rem}
+.tag{display:inline-block;font-size:.65rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#555;border:1px solid #222;border-radius:100px;padding:.25rem .9rem;margin-bottom:1.2rem}
+.em{color:#fff;font-weight:600}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;margin-top:1.5rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.8rem;margin-top:1.5rem}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-top:1.5rem}
+.card{border:1px solid #1a1a1a;border-radius:10px;padding:1.4rem;background:#0a0a0a;transition:border-color .3s}
+.card:hover{border-color:#333}
+.num{font-size:clamp(2.2rem,4.5vw,3.8rem);font-weight:900;letter-spacing:-.04em;background:linear-gradient(135deg,#fff 30%,#555);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block}
+.num-label{font-size:.8rem;color:#555;margin-top:.2rem}
+ul{list-style:none}ul li{position:relative;padding-left:1.1em;margin-bottom:.4rem}
+ul li::before{content:"→";position:absolute;left:0;color:#333;font-size:.85em}
+table{width:100%;border-collapse:collapse;font-size:clamp(.78rem,1vw,.9rem)}
+th{text-align:left;padding:.55rem .8rem;border-bottom:1px solid #222;font-weight:600;color:#444;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em}
+td{padding:.55rem .8rem;border-bottom:1px solid #111;color:#aaa}
+hr{border:none;border-top:1px solid #151515;margin:1.5rem 0}
+.flow{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-top:1rem}
+.flow span{border:1px solid #222;border-radius:6px;padding:.45rem .8rem;font-size:.8rem;font-weight:500;color:#999}
+.flow .arr{border:none;color:#333;padding:0;font-size:1.1rem}
+.foot{position:absolute;bottom:3vh;left:8vw;right:8vw;font-size:.7rem;color:#333}
+.nav{position:fixed;bottom:1.5rem;right:2rem;display:flex;align-items:center;gap:.8rem;z-index:100}
+.nav .ct{font-size:.7rem;color:#333;font-variant-numeric:tabular-nums}
+.nav button{background:none;border:1px solid #1a1a1a;color:#444;width:2rem;height:2rem;border-radius:6px;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.nav button:hover{border-color:#555;color:#fff}
+.glow{text-shadow:0 0 80px rgba(255,255,255,.08)}
+@media(max-width:900px){.g2,.g3,.g5{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- 1 — TITLE -->
+<div class="slide active" data-s="1">
+<span class="tag">July 2026</span>
+<h1 class="glow" style="font-size:clamp(3rem,7vw,6rem)">Yukti</h1>
+<p class="sub">Your clients use Tally to keep books.<br><span class="em">You need an operating system to run your practice.</span></p>
+<p style="color:#333;font-size:.8rem">Arrow keys to navigate · F for fullscreen</p>
+</div>
+
+<!-- 2 — PROBLEM -->
+<div class="slide" data-s="2">
+<span class="tag">The Problem</span>
+<h1>CA firms don't lack clients.<br>They lack the capacity to serve them.</h1>
+<div class="g3" style="margin-top:2.5rem">
+<div style="text-align:center"><span class="num">72%</span><span class="num-label">of India's 1 lakh CA firms are<br>small practices (ICAI, Oct 2025)</span></div>
+<div style="text-align:center"><span class="num">~10 hrs</span><span class="num-label">per client per month<br>spent on GST compliance alone</span></div>
+<div style="text-align:center"><span class="num">65–70%</span><span class="num-label">of that work is mechanical —<br>data entry, matching, chasing</span></div>
+</div>
+<hr>
+<p style="font-size:1.05rem;color:#888">A 40-client firm burns <span class="em">400 hours/month</span> on GST — that's 2.5 full-time juniors just typing invoices, matching Excel sheets, and generating returns. Hiring more juniors takes 6 months to train. The good ones leave after 18.</p>
+</div>
+
+<!-- 3 — WHY NOW -->
+<div class="slide" data-s="3">
+<span class="tag">Why Now</span>
+<h1>The government just made<br>accuracy non-optional.</h1>
+<div class="g2" style="margin-top:1.5rem">
+<div class="card">
+<h3>GSTR-3B Hard-Lock <span style="color:#555">· July 2025</span></h3>
+<p>Tax liability fields are now <span class="em">non-editable</span> in GSTR-3B. Data pulls directly from GSTR-1. The "fix it later" approach is permanently dead.</p>
+</div>
+<div class="card">
+<h3>ITC Filing Blocks <span style="color:#555">· 2026</span></h3>
+<p>Mismatches between GSTR-2B and GSTR-3B now <span class="em">block filing entirely</span>. Reconciliation isn't best-practice — it's survival.</p>
+</div>
+<div class="card">
+<h3>3-Year Filing Bar <span style="color:#555">· July 2025</span></h3>
+<p>Returns older than 3 years are <span class="em">permanently blocked</span>. No extensions. Backlogs are now irreversible compliance risk.</p>
+</div>
+<div class="card">
+<h3>ClearTax Exits Small Firms <span style="color:#555">· Late 2025</span></h3>
+<p>ClearTax dropped accounts below ₹50K/year. Small CA firms are actively being told to <span class="em">migrate elsewhere</span>. The market is wide open.</p>
+</div>
+</div>
+</div>
+
+<!-- 4 — SOLUTION -->
+<div class="slide" data-s="4">
+<span class="tag">The Solution</span>
+<h1>Yukti makes your team<br>2× more productive.</h1>
+<p class="sub">Not "replace your juniors." Make everyone faster — starting with GST.</p>
+<div class="g3">
+<div class="card" style="border-color:#333">
+<h3>📥 Intake</h3>
+<p>Clients forward invoices via email or WhatsApp. Yukti receives, processes, structures — <span class="em">no junior typing into Tally.</span></p>
+</div>
+<div class="card" style="border-color:#333">
+<h3>🧠 Intelligence</h3>
+<p>India-built AI (Sarvam) extracts data in <span class="em">22 languages</span>. Regex validates GSTINs and math. 3-pass engine reconciles books with GSTR-2B in <span class="em">under 30 seconds.</span></p>
+</div>
+<div class="card" style="border-color:#333">
+<h3>👁️ Review</h3>
+<p>Senior CA sees <span class="em">only the exceptions</span> — sorted by ₹ impact. Keyboard shortcuts. Bulk approve. 300–500 items per hour. Return JSON ready in one click.</p>
+</div>
+</div>
+<div class="flow">
+<span>Invoice photo received</span><span class="arr">→</span>
+<span>AI extracts in 15s</span><span class="arr">→</span>
+<span>Auto-posted to books</span><span class="arr">→</span>
+<span>Reconciled with portal</span><span class="arr">→</span>
+<span>Exceptions flagged</span><span class="arr">→</span>
+<span>Return JSON ready</span>
+</div>
+</div>
+
+<!-- 5 — BEFORE/AFTER -->
+<div class="slide" data-s="5">
+<span class="tag">Impact</span>
+<h1>Before Yukti vs. After Yukti.</h1>
+<table style="margin-top:1.5rem">
+<thead><tr><th style="width:28%">Job</th><th style="width:36%">Before</th><th style="width:36%">After</th></tr></thead>
+<tbody>
+<tr><td class="em">Collect invoices</td><td>Clients dump a folder on deadline day</td><td>Real-time intake via email/WhatsApp</td></tr>
+<tr><td class="em">Extract data</td><td>Junior types into Tally — 2–4 min each</td><td>AI extracts in 15 seconds. 22 languages.</td></tr>
+<tr><td class="em">Keep books current</td><td>Always behind. Catch-up panic.</td><td>80–90% current automatically.</td></tr>
+<tr><td class="em">Reconcile with GSTN</td><td>Manual Excel. 1–2 days per client.</td><td>10,000 records in 30 seconds.</td></tr>
+<tr><td class="em">Chase vendors</td><td>Manual calls. Often skipped.</td><td>Auto-drafted follow-ups. 7/14 day escalation.</td></tr>
+<tr><td class="em">Prepare returns</td><td>Manual. Error-prone. Stressful.</td><td>Auto-generated JSON. One-click approve.</td></tr>
+<tr><td class="em">Track deadlines</td><td>Excel sheet and memory</td><td>Auto-generated calendar + team reminders</td></tr>
+</tbody>
+</table>
+<hr>
+<p style="font-size:1rem"><span class="em">Bottom line:</span> GST work per client drops from ~10 hours to ≤ 3 hours/month. A 40-client firm reclaims ~280 hours/month.</p>
+</div>
+
+<!-- 6 — RECONCILIATION -->
+<div class="slide" data-s="6">
+<span class="tag">Core Engine</span>
+<h1>Reconciliation that<br>recovers money.</h1>
+<div class="g2">
+<div>
+<h3>3-pass matching</h3>
+<table>
+<tbody>
+<tr><td class="em">Pass 1 — Exact</td><td>GSTIN + Invoice# + Amount</td><td>70–80%</td></tr>
+<tr><td class="em">Pass 2 — Fuzzy</td><td>Weighted scoring (amount, date, similarity)</td><td>15–20%</td></tr>
+<tr><td class="em">Pass 3 — Smart</td><td>Many-to-one consolidation, subset-sum</td><td>3–5%</td></tr>
+</tbody>
+</table>
+<p style="margin-top:1rem">Match rate: <span class="em">≥ 98%</span>. False positive rate: <span class="em">&lt; 0.1%</span>.</p>
+</div>
+<div>
+<h3>Every mismatch = ₹ quantified</h3>
+<ul>
+<li><span class="em">Books only</span> → vendor follow-up auto-generated</li>
+<li><span class="em">Portal only</span> → ITC you're missing, action needed</li>
+<li><span class="em">Amount mismatch</span> → ITC at lower value, flagged</li>
+<li><span class="em">Duplicate</span> → excess ITC risk, urgent</li>
+</ul>
+<p style="margin-top:.8rem">Dashboard sorts by <span class="em">₹ impact descending</span>. This turns Yukti from "lists mismatches" into <span class="em">"recovers money."</span></p>
+</div>
+</div>
+</div>
+
+<!-- 7 — AI -->
+<div class="slide" data-s="7">
+<span class="tag">Technology</span>
+<h1>India-built AI.<br>Not a wrapper on ChatGPT.</h1>
+<div class="g2">
+<div>
+<h3>Sarvam AI — why it matters</h3>
+<ul>
+<li><span class="em">22 Indian languages</span> — Hindi, Gujarati, Tamil from Day 1</li>
+<li><span class="em">35M+ pages processed</span> — battle-tested on Indian documents</li>
+<li><span class="em">Sarvam 30B is open source</span> — we self-host, fine-tune on your correction data</li>
+<li><span class="em">₹0.15–0.25 per invoice</span> — 50% cheaper than US APIs</li>
+<li><span class="em">Data never leaves India</span> — AWS Mumbai. DPDP compliant.</li>
+</ul>
+</div>
+<div>
+<h3>The learning flywheel</h3>
+<div class="card" style="margin-top:0">
+<p style="color:#666;font-size:.9rem">
+Every CA correction → updates vendor pattern store → feeds model fine-tuning → higher auto-post rate → fewer corrections → better product.
+</p>
+<p style="margin-top:.8rem"><span class="em">Month 1:</span> ~60–70% auto-post rate</p>
+<p><span class="em">Month 3:</span> ~80% auto-post rate</p>
+<p><span class="em">Month 6:</span> ~90%+ auto-post rate</p>
+<p style="margin-top:.8rem;color:#666;font-size:.85rem">Your corrections make YOUR Yukti smarter. No competitor using generic APIs can match a model fine-tuned on real CA data.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 8 — TALLY -->
+<div class="slide" data-s="8">
+<span class="tag">Positioning</span>
+<h1>Yukti + Tally.<br>Never Yukti vs. Tally.</h1>
+<div class="g2" style="margin-top:2rem">
+<div class="card">
+<h3>Tally = The bookkeeping engine</h3>
+<p style="margin-bottom:.6rem">Used by: the client's business / in-house accountant</p>
+<ul>
+<li>Accounting entries & ledgers</li>
+<li>Invoice generation for the business</li>
+<li>Connected GST (upload/download)</li>
+<li>10M+ SME users in India</li>
+</ul>
+</div>
+<div class="card" style="border-color:#333">
+<h3>Yukti = The CA intelligence layer</h3>
+<p style="margin-bottom:.6rem">Used by: the CA firm (principal, senior, junior)</p>
+<ul>
+<li>Multi-client management (40+ clients, one view)</li>
+<li>AI document intake & extraction</li>
+<li>Cross-client reconciliation with GSTN</li>
+<li>Exception-first review, not data-entry</li>
+<li>Practice mgmt, TDS, ITR, notice handling</li>
+</ul>
+</div>
+</div>
+<hr>
+<p style="font-size:1.1rem;text-align:center;color:#888">Yukti <span class="em">reads from</span> Tally. Yukti <span class="em">generates vouchers for</span> Tally. Your Tally stays your Tally.</p>
+</div>
+
+<!-- 9 — ROADMAP -->
+<div class="slide" data-s="9">
+<span class="tag">Roadmap</span>
+<h1>GST is the foot in the door.</h1>
+<div class="g5" style="margin-top:1.5rem">
+<div class="card" style="border-color:#444">
+<p style="font-size:.6rem;font-weight:700;letter-spacing:.15em;color:#888;text-transform:uppercase;margin-bottom:.5rem">V1 · Now</p>
+<h3 style="font-size:.95rem">GST Engine</h3>
+<p style="font-size:.78rem">AI invoice intake · Reconciliation · Review dashboard · Return prep · Vendor follow-ups</p>
+</div>
+<div class="card">
+<p style="font-size:.6rem;font-weight:700;letter-spacing:.15em;color:#555;text-transform:uppercase;margin-bottom:.5rem">V2 · Month 4</p>
+<h3 style="font-size:.95rem">TDS + Practice Mgmt</h3>
+<p style="font-size:.78rem">TDS returns · Form 16 · Client CRM · Credential vault · Billing · Deadline calendar</p>
+</div>
+<div class="card">
+<p style="font-size:.6rem;font-weight:700;letter-spacing:.15em;color:#555;text-transform:uppercase;margin-bottom:.5rem">V3 · Month 7</p>
+<h3 style="font-size:.95rem">ITR Prep</h3>
+<p style="font-size:.78rem">AIS/TIS import · Income computation · Deduction optimization · Bulk e-filing</p>
+</div>
+<div class="card">
+<p style="font-size:.6rem;font-weight:700;letter-spacing:.15em;color:#555;text-transform:uppercase;margin-bottom:.5rem">V4 · Month 10</p>
+<h3 style="font-size:.95rem">Notices</h3>
+<p style="font-size:.78rem">AI notice parsing · Response drafts · Lifecycle tracking · Risk scoring</p>
+</div>
+<div class="card">
+<p style="font-size:.6rem;font-weight:700;letter-spacing:.15em;color:#555;text-transform:uppercase;margin-bottom:.5rem">V5 · Year 2</p>
+<h3 style="font-size:.95rem">Full CA OS</h3>
+<p style="font-size:.78rem">MCA/ROC · Bank feeds · GSTN API filing · Live Tally sync · Hindi UI</p>
+</div>
+</div>
+<hr>
+<p style="color:#555;font-size:.9rem"><span class="em">Practice Management (V2)</span> is the stickiness feature — once operations run on Yukti, switching cost is very high. <span class="em">ITR (V3)</span> targets the July–September peak when firms actually turn away clients.</p>
+</div>
+
+<!-- 10 — SECURITY -->
+<div class="slide" data-s="10">
+<span class="tag">Trust</span>
+<h1>Built for financial data.</h1>
+<div class="g3" style="margin-top:1.5rem">
+<div class="card">
+<h3>Data Protection</h3>
+<ul>
+<li>All data in <span class="em">AWS Mumbai</span></li>
+<li>AES-256 encryption at rest</li>
+<li>TLS 1.3 in transit</li>
+<li>PAN & GSTIN column-encrypted</li>
+<li>Per-firm row-level isolation</li>
+</ul>
+</div>
+<div class="card">
+<h3>Access & Audit</h3>
+<ul>
+<li>RBAC: principal, senior, junior, viewer</li>
+<li>Mandatory MFA for senior roles</li>
+<li>Immutable audit trail — every action</li>
+<li>7-year retention (statutory)</li>
+<li>Formal DPA with every firm</li>
+</ul>
+</div>
+<div class="card">
+<h3>Compliance Path</h3>
+<ul>
+<li><span class="em">Day 1:</span> DPDP Act 2023 compliant</li>
+<li><span class="em">Month 6:</span> SOC 2 Type I readiness</li>
+<li><span class="em">Year 1:</span> SOC 2 Type I audit</li>
+<li><span class="em">Year 2:</span> ISO 27001 + Type II</li>
+</ul>
+</div>
+</div>
+<hr>
+<p style="color:#555;font-size:.9rem">Your client data is safer in Yukti than in email attachments, WhatsApp groups, or shared Excel sheets with passwords in column B.</p>
+</div>
+
+<!-- 11 — PRICING -->
+<div class="slide" data-s="11">
+<span class="tag">Pricing</span>
+<h1>Pays for itself in Month 1.</h1>
+<div class="g3" style="margin-top:2rem">
+<div class="card">
+<p style="font-size:.6rem;font-weight:700;letter-spacing:.15em;color:#555;text-transform:uppercase;margin-bottom:.3rem">Starter</p>
+<span class="num" style="font-size:2.2rem">₹12K</span><span style="color:#555;font-size:.85rem">/month · up to 20 clients</span>
+<hr>
+<ul style="margin-top:.5rem">
+<li>Email + web intake</li>
+<li>AI extraction & reconciliation</li>
+<li>Review dashboard</li>
+<li>Return preparation</li>
+</ul>
+</div>
+<div class="card" style="border-color:#444">
+<p style="font-size:.6rem;font-weight:700;letter-spacing:.15em;color:#888;text-transform:uppercase;margin-bottom:.3rem">Growth</p>
+<span class="num" style="font-size:2.2rem">₹20K</span><span style="color:#555;font-size:.85rem">/month · up to 40 clients</span>
+<hr>
+<ul style="margin-top:.5rem">
+<li>Everything in Starter</li>
+<li>WhatsApp intake</li>
+<li>Vendor follow-up automation</li>
+<li>Analytics dashboard</li>
+</ul>
+</div>
+<div class="card">
+<p style="font-size:.6rem;font-weight:700;letter-spacing:.15em;color:#555;text-transform:uppercase;margin-bottom:.3rem">Professional</p>
+<span class="num" style="font-size:2.2rem">₹30K</span><span style="color:#555;font-size:.85rem">/month · 60+ clients</span>
+<hr>
+<ul style="margin-top:.5rem">
+<li>Everything in Growth</li>
+<li>Practice management</li>
+<li>TDS automation</li>
+<li>Dedicated account manager</li>
+</ul>
+</div>
+</div>
+<hr>
+<p style="font-size:.95rem;color:#888"><span class="em">The math:</span> One junior costs ₹16K–24K/month (salary + overhead). If Yukti saves 1 FTE of work, ROI is instant. But the real value? <span class="em">Take on 10 more clients</span> at ₹5K–15K each in fees = ₹50K–1.5L in new revenue. Yukti sells growth, not savings.</p>
+</div>
+
+<!-- 12 — PILOT -->
+<div class="slide" data-s="12">
+<span class="tag">Get Started</span>
+<h1>Start with 2 clients.<br>See results in 30 days.</h1>
+<div class="g2" style="margin-top:2rem">
+<div>
+<h3>The offer</h3>
+<ul>
+<li>Pick <span class="em">2 clients</span> from your existing book</li>
+<li>We onboard them <span class="em">together in 60 minutes</span></li>
+<li><span class="em">30-day evaluation</span> — doesn't save you time? Walk away.</li>
+<li><span class="em">Pilot pricing: ₹12K/month</span>, locked for 6 months</li>
+<li><span class="em">Founder-led support</span> for 90 days</li>
+</ul>
+</div>
+<div>
+<h3>What we commit to</h3>
+<table>
+<tbody>
+<tr><td class="em" style="width:40%">Auto-post rate</td><td>80%+ by month 3</td></tr>
+<tr><td class="em">Time saved</td><td>~10 hrs → ≤ 3 hrs per client/month</td></tr>
+<tr><td class="em">ITC recovery</td><td>≥ ₹25K at risk identified per client/month</td></tr>
+<tr><td class="em">Match rate</td><td>≥ 98% on matchable records</td></tr>
+</tbody>
+</table>
+<h3 style="margin-top:1.5rem">What we need from you</h3>
+<p>Tally purchase register export (Excel) for 2 clients. Last 3 months of GSTR-2B files. 60 minutes. Honest feedback.</p>
+</div>
+</div>
+</div>
+
+<!-- 13 — CLOSE -->
+<div class="slide" data-s="13" style="justify-content:flex-end;padding-bottom:12vh">
+<span class="tag">Let's Build This Together</span>
+<h1 class="glow" style="font-size:clamp(2.5rem,5.5vw,5rem)">Tally keeps your clients' books.<br>Yukti runs your practice.</h1>
+<p class="sub">2 clients. 30 days. If it doesn't work, walk away.</p>
+<p style="color:#444;font-size:.95rem;margin-top:1rem">[Your Name] · [email] · [phone]<br>All data in India. Bank-grade security. Built with practicing CAs.</p>
+</div>
+
+</div>
+
+<div class="nav">
+<span class="ct" id="ct">1 / 13</span>
+<button id="pv" aria-label="Previous">←</button>
+<button id="nx" aria-label="Next">→</button>
+</div>
+
+<script>
+const S=document.querySelectorAll('.slide');let c=0;
+function go(i){if(i<0||i>=S.length)return;S[c].classList.remove('active');c=i;S[c].classList.add('active');document.getElementById('ct').textContent=`${c+1} / ${S.length}`}
+document.getElementById('nx').onclick=()=>go(c+1);
+document.getElementById('pv').onclick=()=>go(c-1);
+document.onkeydown=e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(c+1)}if(e.key==='ArrowLeft'){e.preventDefault();go(c-1)}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}};
+</script>
+</body>
+</html>
