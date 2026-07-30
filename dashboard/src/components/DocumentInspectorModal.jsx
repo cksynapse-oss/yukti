@@ -37,7 +37,7 @@ export default function DocumentInspectorModal({ item, onClose, onSaveAndPost })
         {/* Modal Header */}
         <div className="modal-header">
           <div className="header-title-group">
-            <FileText style={{ width: 22, height: 22, color: '#6366f1' }} />
+            <FileText style={{ width: 22, height: 22, color: '#0F5A47' }} />
             <div>
               <h2>Side-by-Side Invoice Inspection</h2>
               <span className="text-muted">Invoice #{invoiceNo} • {item.supplierName}</span>
@@ -127,7 +127,7 @@ export default function DocumentInspectorModal({ item, onClose, onSaveAndPost })
           {/* Right Panel: Side-by-Side Editable Fields & GSTR-2B Entry */}
           <div className="right-fields-panel">
             <div className="reasoning-card">
-              <Sparkles style={{ width: 18, height: 18, color: '#6366f1' }} />
+              <Sparkles style={{ width: 18, height: 18, color: '#0F5A47' }} />
               <div>
                 <h4>Sarvam AI OCR &amp; Verification Reasoning</h4>
                 <p>{item.reasoning}</p>

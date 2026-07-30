@@ -6,8 +6,9 @@ import ReconciliationView from './components/ReconciliationView';
 import DocumentInspectorModal from './components/DocumentInspectorModal';
 import VendorFollowupModal from './components/VendorFollowupModal';
 import ReturnPrepModal from './components/ReturnPrepModal';
+import NoticeAssistant from './components/NoticeAssistant';
 
-import { FIRM_INFO, GLOBAL_STATS, CLIENTS, REVIEW_ITEMS, RECONCILIATION_DATA, GSTR_SUMMARY } from './data/mockData';
+import { FIRM_INFO, GLOBAL_STATS, CLIENTS, REVIEW_ITEMS, RECONCILIATION_DATA, GSTR_SUMMARY, NOTICES } from './data/mockData';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('queue'); // 'clients', 'queue', 'reconciliation'
@@ -110,6 +111,10 @@ export default function App() {
               });
             }}
           />
+        )}
+
+        {activeTab === 'notices' && (
+          <NoticeAssistant notices={NOTICES} />
         )}
       </main>
 

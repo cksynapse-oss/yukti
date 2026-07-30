@@ -25,7 +25,12 @@ export const CLIENTS = [
     invoicesCount: 342,
     autoPostedPct: 91,
     itcAtRisk: "₹1,24,000",
-    status: "GSTR-1 Ready"
+    status: "GSTR-1 Ready",
+    gstr1Status: "Filed",
+    gstr3bStatus: "Draft",
+    pendingExceptions: 3,
+    nextDeadline: "20 Aug",
+    unclaimedITC: "₹1,24,000"
   },
   {
     id: "c2",
@@ -35,7 +40,12 @@ export const CLIENTS = [
     invoicesCount: 189,
     autoPostedPct: 82,
     itcAtRisk: "₹88,500",
-    status: "Mismatches Open"
+    status: "Mismatches Open",
+    gstr1Status: "Draft",
+    gstr3bStatus: "Overdue",
+    pendingExceptions: 8,
+    nextDeadline: "11 Aug",
+    unclaimedITC: "₹88,500"
   },
   {
     id: "c3",
@@ -45,7 +55,12 @@ export const CLIENTS = [
     invoicesCount: 94,
     autoPostedPct: 88,
     itcAtRisk: "₹42,000",
-    status: "GSTR-3B Pending"
+    status: "GSTR-3B Pending",
+    gstr1Status: "Filed",
+    gstr3bStatus: "Draft",
+    pendingExceptions: 2,
+    nextDeadline: "20 Aug",
+    unclaimedITC: "₹42,000"
   },
   {
     id: "c4",
@@ -55,7 +70,12 @@ export const CLIENTS = [
     invoicesCount: 215,
     autoPostedPct: 79,
     itcAtRisk: "₹1,65,000",
-    status: "Mismatches Open"
+    status: "Mismatches Open",
+    gstr1Status: "Overdue",
+    gstr3bStatus: "Overdue",
+    pendingExceptions: 12,
+    nextDeadline: "11 Aug",
+    unclaimedITC: "₹1,65,000"
   },
   {
     id: "c5",
@@ -65,7 +85,12 @@ export const CLIENTS = [
     invoicesCount: 120,
     autoPostedPct: 85,
     itcAtRisk: "₹53,000",
-    status: "GSTR-1 Ready"
+    status: "GSTR-1 Ready",
+    gstr1Status: "Filed",
+    gstr3bStatus: "Filed",
+    pendingExceptions: 1,
+    nextDeadline: "20 Sep",
+    unclaimedITC: "₹53,000"
   }
 ];
 
@@ -89,7 +114,10 @@ export const REVIEW_ITEMS = [
     issueDescription: "Taxable amount and GST calculation mismatch.",
     reasoning: "Calculated tax at 18% is ₹9,000 but invoice states ₹8,550 (₹450 difference).",
     gstr2bMatchStatus: "Mismatched",
-    suggestedLedger: "Purchase A/c - 18%"
+    suggestedLedger: "Purchase A/c - 18%",
+    tdsSection: null,
+    tdsRate: null,
+    tdsStatus: null
   },
   {
     id: "ri2",
@@ -110,7 +138,10 @@ export const REVIEW_ITEMS = [
     issueDescription: "Supplier GSTIN missing or illegible in document.",
     reasoning: "OCR engine failed to reliably extract 15-digit GSTIN format.",
     gstr2bMatchStatus: "Not Found",
-    suggestedLedger: "Suspense A/c"
+    suggestedLedger: "Suspense A/c",
+    tdsSection: null,
+    tdsRate: null,
+    tdsStatus: null
   },
   {
     id: "ri3",
@@ -131,7 +162,10 @@ export const REVIEW_ITEMS = [
     issueDescription: "Unusual tax rate for supplier category.",
     reasoning: "Tax charged at 28% but historical data suggests 18% for this vendor.",
     gstr2bMatchStatus: "Matched",
-    suggestedLedger: "Electronics Purchase A/c - 28%"
+    suggestedLedger: "Electronics Purchase A/c - 28%",
+    tdsSection: "194Q",
+    tdsRate: "0.1%",
+    tdsStatus: "Not Deducted"
   },
   {
     id: "ri4",
@@ -152,7 +186,10 @@ export const REVIEW_ITEMS = [
     issueDescription: "First time invoice received from this GSTIN.",
     reasoning: "Vendor not found in current Tally master records.",
     gstr2bMatchStatus: "Matched",
-    suggestedLedger: "Freight Charges A/c"
+    suggestedLedger: "Freight Charges A/c",
+    tdsSection: "194C",
+    tdsRate: "2%",
+    tdsStatus: "Deducted"
   },
   {
     id: "ri5",
@@ -173,7 +210,10 @@ export const REVIEW_ITEMS = [
     issueDescription: "Grand total does not equal Taxable + GST.",
     reasoning: "Taxable (150k) + Tax (42k) = 192k. Invoice total reads 195k.",
     gstr2bMatchStatus: "Mismatched",
-    suggestedLedger: "Raw Material A/c"
+    suggestedLedger: "Raw Material A/c",
+    tdsSection: null,
+    tdsRate: null,
+    tdsStatus: null
   },
   {
     id: "ri6",
@@ -194,7 +234,10 @@ export const REVIEW_ITEMS = [
     issueDescription: "Potential Section 17(5) blocked credit.",
     reasoning: "Items identified as employee welfare/food expenses.",
     gstr2bMatchStatus: "Matched",
-    suggestedLedger: "Office Expenses A/c"
+    suggestedLedger: "Office Expenses A/c",
+    tdsSection: null,
+    tdsRate: null,
+    tdsStatus: null
   },
   {
     id: "ri7",
@@ -215,7 +258,10 @@ export const REVIEW_ITEMS = [
     issueDescription: "GTA service may require Reverse Charge Mechanism.",
     reasoning: "Charged at 5% GST; verify if RCM is applicable for receiver.",
     gstr2bMatchStatus: "Matched",
-    suggestedLedger: "Transport Charges A/c"
+    suggestedLedger: "Transport Charges A/c",
+    tdsSection: "194C",
+    tdsRate: "1%",
+    tdsStatus: "Under-Deducted"
   },
   {
     id: "ri8",
@@ -236,7 +282,10 @@ export const REVIEW_ITEMS = [
     issueDescription: "Inter-state supply charged as Intra-state.",
     reasoning: "Supplier in state 29 (KA), customer in state 27 (MH). Should be IGST.",
     gstr2bMatchStatus: "Not Found",
-    suggestedLedger: "Software Subscriptions A/c"
+    suggestedLedger: "Software Subscriptions A/c",
+    tdsSection: "194J",
+    tdsRate: "2%",
+    tdsStatus: "Not Deducted"
   },
   {
     id: "ri9",
@@ -257,7 +306,10 @@ export const REVIEW_ITEMS = [
     issueDescription: "Invoice already exists in books.",
     reasoning: "Invoice number CS-002 from City Stationers previously recorded in June.",
     gstr2bMatchStatus: "Matched",
-    suggestedLedger: "Printing & Stationery A/c"
+    suggestedLedger: "Printing & Stationery A/c",
+    tdsSection: null,
+    tdsRate: null,
+    tdsStatus: null
   },
   {
     id: "ri10",
@@ -278,7 +330,10 @@ export const REVIEW_ITEMS = [
     issueDescription: "Professional services exceeding threshold; TDS applicable.",
     reasoning: "Invoice > 30k for services; TDS under 194J/194C needs review.",
     gstr2bMatchStatus: "Matched",
-    suggestedLedger: "Advertisement A/c"
+    suggestedLedger: "Advertisement A/c",
+    tdsSection: "194J",
+    tdsRate: "10%",
+    tdsStatus: "Not Deducted"
   },
   {
     id: "ri11",
@@ -299,7 +354,10 @@ export const REVIEW_ITEMS = [
     issueDescription: "CGST/SGST charged by out-of-state hotel.",
     reasoning: "Hotel in Delhi (07), customer in MH (27). ITC generally ineligible in home state.",
     gstr2bMatchStatus: "Not Found",
-    suggestedLedger: "Travel Exp A/c"
+    suggestedLedger: "Travel Exp A/c",
+    tdsSection: null,
+    tdsRate: null,
+    tdsStatus: null
   },
   {
     id: "ri12",
@@ -320,7 +378,10 @@ export const REVIEW_ITEMS = [
     issueDescription: "Date format ambiguity or mismatch.",
     reasoning: "OCR read 19-07-2026 but text looks like 17-09-2026.",
     gstr2bMatchStatus: "Mismatched",
-    suggestedLedger: "Repairs & Maintenance A/c"
+    suggestedLedger: "Repairs & Maintenance A/c",
+    tdsSection: null,
+    tdsRate: null,
+    tdsStatus: null
   }
 ];
 
@@ -331,6 +392,19 @@ export const RECONCILIATION_DATA = {
     pass3_smart: 5,
     unmatched: 3
   },
+  itcBreakdown: {
+    eligible: { count: 892, value: "₹14,20,000", pct: 71.5 },
+    ineligible: { count: 45, value: "₹3,45,000", label: "Rule 38/42/43 & Sec 17(5)", pct: 3.6 },
+    missingIn2B: { count: 24, value: "₹1,85,000", label: "Vendor Follow-up Needed", pct: 1.9 },
+    rateMismatch: { count: 8, value: "₹89,500", label: "Tax Rate Differs", pct: 0.6 }
+  },
+  threeWaySample: [
+    { vendor: "TechPro Systems", invoiceNo: "INV/26-27/102", ocrAmount: 59000, tallyAmount: 59000, portalAmount: 58550, status: "Amount Mismatch", itcCategory: "rateMismatch" },
+    { vendor: "Global Trade Corp", invoiceNo: "GT/2026/089", ocrAmount: 134400, tallyAmount: 134400, portalAmount: null, status: "Missing in 2B", itcCategory: "missingIn2B" },
+    { vendor: "Premium Electronics", invoiceNo: "PE-001/Jul", ocrAmount: 256000, tallyAmount: 256000, portalAmount: 256000, status: "Exact Match", itcCategory: "eligible" },
+    { vendor: "BuildWell Cements", invoiceNo: "BWC/445", ocrAmount: 195000, tallyAmount: 192000, portalAmount: 192000, status: "OCR Mismatch", itcCategory: "rateMismatch" },
+    { vendor: "Office Supplies Hub", invoiceNo: "OSH-998", ocrAmount: 14160, tallyAmount: 14160, portalAmount: 14160, status: "Exact Match", itcCategory: "ineligible" },
+  ],
   mismatchBuckets: {
     books_only: { count: 24, value: "₹1,85,000", description: "Invoices in Tally books but missing in supplier GSTR-1 (GSTR-2B)" },
     portal_only: { count: 12, value: "₹1,42,000", description: "Invoices available in GSTR-2B but omitted from Tally books" },
@@ -345,3 +419,51 @@ export const GSTR_SUMMARY = {
   ineligibleITC_sec17_5: "₹45,000",
   netTaxPayable: "₹0 - Refund Eligible"
 };
+
+export const NOTICES = [
+  {
+    id: "n1",
+    type: "ASMT-10",
+    section: "Section 61",
+    clientName: "Apex General Traders",
+    gstin: "27AAAAA1234B1Z5",
+    issueDate: "15-07-2026",
+    replyDueDate: "14-08-2026",
+    daysLeft: 15,
+    demandAmount: "₹2,45,000",
+    subject: "Scrutiny of Returns — GSTR-3B Discrepancy for FY 2025-26",
+    description: "Mismatch observed between GSTR-3B filed returns and GSTR-1 outward supplies. ITC claimed exceeds eligible amount by ₹2,45,000 for the period April 2025 to March 2026.",
+    status: "Pending Reply",
+    draftReply: "Respected Sir/Madam,\n\nWith reference to the above notice dated 15-07-2026, we respectfully submit that the apparent discrepancy of ₹2,45,000 in ITC claimed arises due to:\n\n1. Credit notes issued by 3 suppliers in Q4 FY 2025-26 which were adjusted in GSTR-3B but reflected in GSTR-2B of the subsequent quarter.\n2. Invoices from 2 inter-state vendors that were uploaded late in GSTR-1 by the suppliers.\n\nWe have attached the reconciliation statement (Annexure A) along with supporting invoices and credit notes for your verification.\n\nWe request you to kindly consider the above and drop the proposed demand.\n\nThanking you."
+  },
+  {
+    id: "n2",
+    type: "DRC-01",
+    section: "Section 73",
+    clientName: "Sunrise Enterprises",
+    gstin: "27AAACS4321D1Z1",
+    issueDate: "22-07-2026",
+    replyDueDate: "21-08-2026",
+    daysLeft: 22,
+    demandAmount: "₹4,18,000",
+    subject: "Demand for Tax — Wrong Availment of ITC on Blocked Credits",
+    description: "ITC of ₹4,18,000 claimed on items falling under Section 17(5) of CGST Act (motor vehicles, food & beverages, club membership). Demand raised for reversal with interest at 18% p.a.",
+    status: "Draft Ready",
+    draftReply: "Respected Sir/Madam,\n\nWith reference to the Show Cause Notice DRC-01 dated 22-07-2026, we submit our response as under:\n\n1. ITC on motor vehicles (₹2,10,000): The vehicle is a commercial goods carrier used exclusively for business transportation. As per Section 17(5)(a)(A), ITC is available on motor vehicles used for transportation of goods. Copies of RC, insurance, and trip records are enclosed.\n\n2. ITC on food & beverages (₹1,08,000): These expenses were incurred for an outdoor catering event for a client conference, which qualifies as an input service. However, we accept reversal of ₹45,000 pertaining to employee welfare meals.\n\n3. Club membership (₹1,00,000): We accept this reversal as it falls under blocked credit.\n\nNet admitted reversal: ₹1,45,000 (against demand of ₹4,18,000).\n\nWe request a personal hearing to present our case.\n\nThanking you."
+  },
+  {
+    id: "n3",
+    type: "DRC-07",
+    section: "Section 73/74",
+    clientName: "Reliance Logistics Pvt Ltd",
+    gstin: "27AAACR5055K1Z2",
+    issueDate: "01-07-2026",
+    replyDueDate: "31-07-2026",
+    daysLeft: 1,
+    demandAmount: "₹89,000",
+    subject: "Order of Demand — Late Filing Penalty and Interest",
+    description: "Demand for interest on delayed payment of GST for the months of January and February 2026. Auto-computed interest at 18% p.a. on the differential amount of ₹4,95,000.",
+    status: "Urgent",
+    draftReply: "Respected Sir/Madam,\n\nWe acknowledge the demand of ₹89,000 towards interest on delayed GST payment. We submit that:\n\n1. The delay was due to a technical glitch in our banking portal which has been documented (bank certificate enclosed).\n2. The interest computation appears to include days beyond the actual payment date. As per our records, payment was made on 25th of each month, not the month-end as computed.\n\nRevised interest calculation enclosed showing ₹62,000 as the correct amount.\n\nWe request revision of the demand order accordingly.\n\nThanking you."
+  }
+];

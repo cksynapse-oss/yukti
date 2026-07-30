@@ -10,7 +10,8 @@ import {
   RefreshCw,
   Zap,
   HelpCircle,
-  FileJson
+  FileJson,
+  FileWarning
 } from 'lucide-react';
 
 export default function HeaderNav({ 
@@ -92,6 +93,15 @@ export default function HeaderNav({
             <Layers className="tab-icon" />
             <span>3-Pass Reconciliation</span>
             <span className="tab-badge badge-green">96.8% Match</span>
+          </button>
+
+          <button 
+            className={`nav-tab ${activeTab === 'notices' ? 'active' : ''}`}
+            onClick={() => setActiveTab('notices')}
+          >
+            <FileWarning className="tab-icon" />
+            <span>Notices</span>
+            <span className="tab-badge badge-amber-solid">3</span>
           </button>
         </nav>
 

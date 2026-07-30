@@ -105,7 +105,7 @@ export default function ReviewQueue({
       {toastMessage && (
         <div className="toast-container">
           <div className="toast">
-            <Sparkles style={{ width: 18, height: 18, color: '#6366f1' }} />
+            <Sparkles style={{ width: 18, height: 18, color: '#0F5A47' }} />
             <span>{toastMessage}</span>
           </div>
         </div>
@@ -155,7 +155,7 @@ export default function ReviewQueue({
       {/* Keyboard Helper Bar */}
       <div className="kbd-bar">
         <div className="kbd-info">
-          <Keyboard style={{ width: 16, height: 16, color: '#6366f1' }} />
+          <Keyboard style={{ width: 16, height: 16, color: '#0F5A47' }} />
           <span className="kbd-title">Senior Keyboard Controls:</span>
         </div>
         <div className="kbd-keys">
@@ -217,6 +217,11 @@ export default function ReviewQueue({
                         {item.issueTag}
                       </span>
                       <span className="gstr2b-status">{item.gstr2bMatchStatus}</span>
+                      {item.tdsSection && (
+                        <span className={`badge ${item.tdsStatus === 'Deducted' ? 'badge-tds-ok' : item.tdsStatus === 'Under-Deducted' ? 'badge-tds-under' : 'badge-tds-miss'}`}>
+                          TDS {item.tdsSection} @ {item.tdsRate} — {item.tdsStatus}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -284,7 +289,7 @@ export default function ReviewQueue({
             <div className="detail-body">
               <div className="reasoning-box">
                 <div className="reasoning-title">
-                  <Sparkles style={{ width: 16, height: 16, color: '#6366f1' }} />
+                  <Sparkles style={{ width: 16, height: 16, color: '#0F5A47' }} />
                   <span>Sarvam AI Confidence Explanation</span>
                 </div>
                 <p>{activeItem.reasoning}</p>
@@ -323,6 +328,18 @@ export default function ReviewQueue({
                   <span className="badge badge-green">Auto-Mapped</span>
                 </div>
               </div>
+
+              {activeItem.tdsSection && (
+                <div className="tally-ledger-box" style={{ borderLeft: activeItem.tdsStatus === 'Deducted' ? '3px solid #10B981' : '3px solid #DC2626' }}>
+                  <label>TDS Applicability — Form 26Q</label>
+                  <div className="ledger-val">
+                    <span>Sec {activeItem.tdsSection} @ {activeItem.tdsRate}</span>
+                    <span className={`badge ${activeItem.tdsStatus === 'Deducted' ? 'badge-tds-ok' : activeItem.tdsStatus === 'Under-Deducted' ? 'badge-tds-under' : 'badge-tds-miss'}`}>
+                      {activeItem.tdsStatus}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div className="detail-action-footer">
                 <button 
