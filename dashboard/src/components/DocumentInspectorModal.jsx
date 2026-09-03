@@ -1,19 +1,55 @@
-import React, { useState } from 'react';
-import { X, Check, FileText, Sparkles, AlertCircle, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  X, 
+  Check, 
+  FileText, 
+  Sparkles, 
+  AlertCircle, 
+  ShieldCheck, 
+  BookOpen, 
+  Building2,
+  Calendar,
+  IndianRupee
+} from 'lucide-react';
+import VendorPatternBanner from './VendorPatternBanner';
 
-export default function DocumentInspectorModal({ item, onClose, onSaveAndPost }) {
+export default function DocumentInspectorModal({ 
+  item, 
+  onClose, 
+  onSaveAndPost,
+  vendorPattern = null
+}) {
   if (!item) return null;
 
-  const [supplierName, setSupplierName] = useState(item.supplierName);
-  const [supplierGstin, setSupplierGstin] = useState(item.supplierGstin);
-  const [invoiceNo, setInvoiceNo] = useState(item.invoiceNo);
-  const [invoiceDate, setInvoiceDate] = useState(item.invoiceDate);
-  const [taxableValue, setTaxableValue] = useState(item.taxableValue);
-  const [cgst, setCgst] = useState(item.cgst);
-  const [sgst, setSgst] = useState(item.sgst);
-  const [igst, setIgst] = useState(item.igst);
-  const [grandTotal, setGrandTotal] = useState(item.grandTotal);
-  const [ledger, setLedger] = useState(item.suggestedLedger);
+  const [supplierName, setSupplierName] = useState(item.supplierName || '');
+  const [supplierGstin, setSupplierGstin] = useState(item.supplierGstin || '');
+  const [invoiceNo, setInvoiceNo] = useState(item.invoiceNo || '');
+  const [invoiceDate, setInvoiceDate] = useState(item.invoiceDate || '');
+  const [taxableValue, setTaxableValue] = useState(item.taxableValue || 0);
+  const [cgst, setCgst] = useState(item.cgst || 0);
+  const [sgst, setSgst] = useState(item.sgst || 0);
+  const [igst, setIgst] = useState(item.igst || 0);
+  const [grandTotal, setGrandTotal] = useState(item.grandTotal || 0);
+  const [ledger, setLedger] = useState(item.suggestedLedger || '');
+  const [hsnCode, setHsnCode] = useState(item.hsnCode || '847130');
+  const [saveAsVendorRule, setSaveAsVendorRule] = useState(true);
+
+  // Recalculate tax & total when values change
+  const handleTaxableChange = (val) => {
+    const num = parseFloat(val) || 0;
+    setTaxableValue(num);
+    if (item.supplyType === 'INTERSTATE') {
+      const newIgst = Math.round(num * 0.05); // default 5% for interstate demo or keep proportional
+      setIgst(newIgst);
+      setGrandTotal(num + newIgst);
+    } else {
+      const newCgst = Math.round(num * 0.09);
+      const newSgst = Math.round(num * 0.09);
+      setCgst(newCgst);
+      setSgst(newSgst);
+      setGrandTotal(num + newCgst + newSgst);
+    }
+  };
 
   const handleSave = () => {
     onSaveAndPost({
@@ -22,243 +58,243 @@ export default function DocumentInspectorModal({ item, onClose, onSaveAndPost })
       supplierGstin,
       invoiceNo,
       invoiceDate,
-      taxableValue: parseFloat(taxableValue),
-      cgst: parseFloat(cgst),
-      sgst: parseFloat(sgst),
-      igst: parseFloat(igst),
-      grandTotal: parseFloat(grandTotal),
+      taxableValue: parseFloat(taxableValue) || 0,
+      cgst: parseFloat(cgst) || 0,
+      sgst: parseFloat(sgst) || 0,
+      igst: parseFloat(igst) || 0,
+      grandTotal: parseFloat(grandTotal) || 0,
       suggestedLedger: ledger,
-    });
+      hsnCode,
+    }, saveAsVendorRule);
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content inspector-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Modal Header */}
-        <div className="modal-header">
-          <div className="header-title-group">
-            <FileText style={{ width: 22, height: 22, color: '#0F5A47' }} />
+      <div className="modal-dialog modal-xl" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="modal-header-bar">
+          <div className="flex items-center gap-2">
+            <FileText size={18} className="text-brand" />
             <div>
-              <h2>Side-by-Side Invoice Inspection</h2>
-              <span className="text-muted">Invoice #{invoiceNo} • {item.supplierName}</span>
+              <h3>Side-by-Side Document Inspection</h3>
+              <span className="text-xs text-muted">
+                Invoice #{invoiceNo} • {supplierName}
+              </span>
             </div>
           </div>
 
-          <div className="header-right">
+          <div className="flex items-center gap-3">
             <span className={`badge ${
-              item.confidenceScore >= 90 ? 'badge-green' :
-              item.confidenceScore >= 75 ? 'badge-amber' : 'badge-red'
+              item.confidenceScore >= 90 ? 'badge-success' :
+              item.confidenceScore >= 75 ? 'badge-warning' : 'badge-danger'
             }`}>
-              Sarvam AI Confidence: {item.confidenceScore}%
+              AI Confidence: {item.confidenceScore}%
             </span>
-            <button className="btn-close" onClick={onClose}>
-              <X style={{ width: 20, height: 20 }} />
+            <button className="btn-icon-action" onClick={onClose}>
+              <X size={16} />
             </button>
           </div>
         </div>
 
-        {/* Modal Body: Left Document Scan, Right Fields */}
-        <div className="inspector-body">
-          {/* Left Panel: Simulated Indian Invoice Graphic */}
-          <div className="left-doc-panel">
-            <div className="doc-canvas">
-              <div className="doc-watermark">CONFIDENTIAL • TAX INVOICE</div>
-              <div className="doc-header">
+        {/* Modal Body */}
+        <div className="modal-body-scroll" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '20px' }}>
+          {/* Left Panel: Simulated Source Document Graphic */}
+          <div style={{ backgroundColor: '#F9FAFB', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '16px', overflowY: 'auto' }}>
+            <div style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '20px', boxShadow: 'var(--shadow-xs)', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: 12, right: 14, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>
+                TAX INVOICE
+              </div>
+
+              {/* Vendor Header */}
+              <div style={{ marginBottom: '14px' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {supplierName || "SUPPLIER NAME"}
+                </h4>
+                <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Plot 45, MIDC Industrial Area, Andheri East, Mumbai 400093
+                </p>
+                <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', fontFamily: 'JetBrains Mono, monospace' }}>
+                  GSTIN: <strong>{supplierGstin}</strong>
+                </p>
+              </div>
+
+              <hr style={{ border: 'none', borderTop: '1px dashed var(--border-color)', margin: '12px 0' }} />
+
+              {/* Meta Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '14px', fontSize: '11px' }}>
                 <div>
-                  <h3 className="doc-vendor-title">{supplierName || "SUPPLIER NAME"}</h3>
-                  <p className="doc-address">Plot 45, MIDC Industrial Area, Andheri East, Mumbai 400093</p>
-                  <p className="doc-gstin">GSTIN: <strong>{supplierGstin}</strong></p>
+                  <span className="text-muted block text-xs">Customer:</span>
+                  <strong className="text-primary">{item.customerName}</strong>
                 </div>
-                <div className="doc-tax-stamp">
-                  <span>TAX INVOICE</span>
-                  <p>ORIGINAL FOR RECIPIENT</p>
+                <div>
+                  <span className="text-muted block text-xs">Invoice No:</span>
+                  <strong className="text-primary font-mono">{invoiceNo}</strong>
+                </div>
+                <div>
+                  <span className="text-muted block text-xs">Date:</span>
+                  <strong className="text-primary">{invoiceDate}</strong>
                 </div>
               </div>
 
-              <hr className="doc-hr" />
-
-              <div className="doc-meta-grid">
-                <div>
-                  <span className="meta-lbl">Billed To (Customer):</span>
-                  <p className="meta-val">{item.customerName}</p>
-                </div>
-                <div>
-                  <span className="meta-lbl">Invoice No:</span>
-                  <p className="meta-val">{invoiceNo}</p>
-                </div>
-                <div>
-                  <span className="meta-lbl">Invoice Date:</span>
-                  <p className="meta-val">{invoiceDate}</p>
-                </div>
-              </div>
-
-              <div className="doc-table">
-                <div className="doc-th">
-                  <span>Item Description</span>
+              {/* Items Table Mockup */}
+              <div style={{ border: '1px solid var(--border-color)', borderRadius: '4px', overflow: 'hidden', marginBottom: '12px', fontSize: '11px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '6px 10px', backgroundColor: 'var(--bg-subtle)', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                  <span>Description</span>
                   <span>HSN</span>
-                  <span>Qty</span>
-                  <span>Rate</span>
-                  <span>Amount (₹)</span>
+                  <span className="text-right">Rate</span>
+                  <span className="text-right">Taxable</span>
                 </div>
-                <div className="doc-tr">
-                  <span>Freight &amp; Transportation Charges</span>
-                  <span>996511</span>
-                  <span>1</span>
-                  <span>{taxableValue}</span>
-                  <span>{taxableValue}</span>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '8px 10px', borderTop: '1px solid var(--border-color)', color: 'var(--text-primary)' }}>
+                  <span>{item.suggestedLedger || "Product / Services"}</span>
+                  <span className="font-mono">{hsnCode}</span>
+                  <span className="text-right">18%</span>
+                  <span className="text-right font-mono">₹{taxableValue?.toLocaleString('en-IN')}</span>
                 </div>
               </div>
 
-              <div className="doc-totals-box">
-                <div className="total-line"><span>Taxable Amount:</span> <span>₹{taxableValue}</span></div>
-                <div className="total-line"><span>CGST (9%):</span> <span>₹{cgst}</span></div>
-                <div className="total-line"><span>SGST (9%):</span> <span>₹{sgst}</span></div>
-                <div className="total-line"><span>IGST:</span> <span>₹{igst}</span></div>
-                <div className="total-line final"><span>Grand Total:</span> <span>₹{grandTotal}</span></div>
-              </div>
-
-              <div className="doc-footer">
-                <p>E-Way Bill No: 271049201948 • Verified via E-Invoice Portal</p>
-                <div className="signature-box">For {supplierName}</div>
+              {/* Totals Summary */}
+              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '10px', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+                  <span>Taxable Value:</span>
+                  <span className="font-mono">₹{taxableValue?.toLocaleString('en-IN')}</span>
+                </div>
+                {cgst > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+                    <span>CGST (9%):</span>
+                    <span className="font-mono">₹{cgst?.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+                {sgst > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+                    <span>SGST (9%):</span>
+                    <span className="font-mono">₹{sgst?.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+                {igst > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+                    <span>IGST (5%):</span>
+                    <span className="font-mono">₹{igst?.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: '13px', color: 'var(--brand)', borderTop: '1px solid var(--border-color)', paddingTop: '6px', marginTop: '4px' }}>
+                  <span>Grand Total:</span>
+                  <span className="font-mono">₹{grandTotal?.toLocaleString('en-IN')}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Right Panel: Side-by-Side Editable Fields & GSTR-2B Entry */}
-          <div className="right-fields-panel">
-            <div className="reasoning-card">
-              <Sparkles style={{ width: 18, height: 18, color: '#0F5A47' }} />
-              <div>
-                <h4>Sarvam AI OCR &amp; Verification Reasoning</h4>
-                <p>{item.reasoning}</p>
-              </div>
-            </div>
+          {/* Right Panel: Editable Extraction Fields */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* Vendor Pattern Banner */}
+            {vendorPattern && <VendorPatternBanner pattern={vendorPattern} />}
 
             <div className="form-grid">
-              <div className="form-group full">
-                <label>Supplier Legal Name</label>
+              <div className="form-group col-span-2">
+                <label className="form-label">Supplier / Vendor Name</label>
                 <input 
                   type="text" 
+                  className="form-input" 
                   value={supplierName} 
-                  onChange={(e) => setSupplierName(e.target.value)} 
+                  onChange={(e) => setSupplierName(e.target.value)}
                 />
               </div>
 
               <div className="form-group">
-                <label>Supplier GSTIN (15-Char)</label>
+                <label className="form-label">Supplier GSTIN</label>
                 <input 
                   type="text" 
+                  className="form-input font-mono uppercase" 
                   value={supplierGstin} 
-                  onChange={(e) => setSupplierGstin(e.target.value)} 
+                  onChange={(e) => setSupplierGstin(e.target.value)}
                 />
               </div>
 
               <div className="form-group">
-                <label>Invoice Number</label>
+                <label className="form-label">Invoice Number</label>
                 <input 
                   type="text" 
+                  className="form-input font-mono" 
                   value={invoiceNo} 
-                  onChange={(e) => setInvoiceNo(e.target.value)} 
+                  onChange={(e) => setInvoiceNo(e.target.value)}
                 />
               </div>
 
               <div className="form-group">
-                <label>Invoice Date</label>
+                <label className="form-label">Invoice Date</label>
                 <input 
                   type="date" 
+                  className="form-input" 
                   value={invoiceDate} 
-                  onChange={(e) => setInvoiceDate(e.target.value)} 
+                  onChange={(e) => setInvoiceDate(e.target.value)}
                 />
               </div>
 
               <div className="form-group">
-                <label>Taxable Value (₹)</label>
+                <label className="form-label">HSN / SAC Code</label>
+                <input 
+                  type="text" 
+                  className="form-input font-mono" 
+                  value={hsnCode} 
+                  onChange={(e) => setHsnCode(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group col-span-2">
+                <label className="form-label">Suggested Tally Purchase Ledger Head</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={ledger} 
+                  onChange={(e) => setLedger(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Taxable Value (₹)</label>
                 <input 
                   type="number" 
+                  className="form-input font-mono" 
                   value={taxableValue} 
-                  onChange={(e) => setTaxableValue(e.target.value)} 
+                  onChange={(e) => handleTaxableChange(e.target.value)}
                 />
               </div>
 
               <div className="form-group">
-                <label>CGST Amount (₹)</label>
+                <label className="form-label">Grand Total (₹)</label>
                 <input 
                   type="number" 
-                  value={cgst} 
-                  onChange={(e) => setCgst(e.target.value)} 
-                />
-              </div>
-
-              <div className="form-group">
-                <label>SGST Amount (₹)</label>
-                <input 
-                  type="number" 
-                  value={sgst} 
-                  onChange={(e) => setSgst(e.target.value)} 
-                />
-              </div>
-
-              <div className="form-group">
-                <label>IGST Amount (₹)</label>
-                <input 
-                  type="number" 
-                  value={igst} 
-                  onChange={(e) => setIgst(e.target.value)} 
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Grand Total Payable (₹)</label>
-                <input 
-                  type="number" 
-                  className="input-highlight"
+                  className="form-input font-mono font-semibold" 
                   value={grandTotal} 
-                  onChange={(e) => setGrandTotal(e.target.value)} 
+                  onChange={(e) => setGrandTotal(parseFloat(e.target.value) || 0)}
                 />
-              </div>
-
-              <div className="form-group full">
-                <label>Tally Ledger Head Target</label>
-                <select value={ledger} onChange={(e) => setLedger(e.target.value)}>
-                  <option value="Freight Charges - Transport A/c">Freight Charges - Transport A/c</option>
-                  <option value="Purchase - Raw Materials 12%">Purchase - Raw Materials 12%</option>
-                  <option value="IT Infrastructure Services">IT Infrastructure Services</option>
-                  <option value="Electrical Machinery Purchase">Electrical Machinery Purchase</option>
-                  <option value="Packing Material Expense">Packing Material Expense</option>
-                </select>
               </div>
             </div>
 
-            {/* Portal GSTR-2B Side-by-side Entry */}
-            <div className="gstr2b-comparison-box">
-              <h4>GSTR-2B Portal Entry Sync</h4>
-              <div className="gstr-comparison-grid">
-                <div>
-                  <span className="lbl">Portal Reported Total:</span>
-                  <span className="val">₹{item.grandTotal + 450}</span>
-                </div>
-                <div>
-                  <span className="lbl">Supplier Filing Date:</span>
-                  <span className="val">11th July 2026</span>
-                </div>
-                <div>
-                  <span className="lbl">ITC Eligibility:</span>
-                  <span className="val text-green">Eligible (Sec 16)</span>
-                </div>
-              </div>
+            {/* Vendor Learning Checkbox (Rillet-style) */}
+            <div style={{ backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input 
+                type="checkbox" 
+                id="saveRuleCheck" 
+                checked={saveAsVendorRule}
+                onChange={(e) => setSaveAsVendorRule(e.target.checked)}
+                style={{ accentColor: 'var(--brand)' }}
+              />
+              <label htmlFor="saveRuleCheck" style={{ fontSize: '12px', color: 'var(--text-primary)', cursor: 'pointer' }}>
+                <strong>Save as Vendor Intelligence Rule:</strong> Auto-apply this Tally ledger & format to future invoices from <code>{supplierGstin}</code>.
+              </label>
             </div>
           </div>
         </div>
 
-        {/* Modal Footer */}
-        <div className="modal-footer">
+        {/* Footer Actions */}
+        <div className="modal-footer-bar">
           <button className="btn btn-secondary" onClick={onClose}>
-            <span>Cancel (Esc)</span>
+            Cancel
           </button>
-
-          <button className="btn btn-success" onClick={handleSave}>
-            <Check style={{ width: 18, height: 18 }} />
-            <span>Save &amp; Auto-Post to Tally Books</span>
+          <button className="btn btn-primary" onClick={handleSave}>
+            <Check size={14} />
+            <span>Save & Auto-Post to Tally</span>
           </button>
         </div>
       </div>

@@ -1,123 +1,173 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
-  Building2, 
   Calendar, 
   Keyboard, 
-  Download, 
-  Sparkles, 
-  Layers, 
-  CheckSquare, 
-  RefreshCw,
-  Zap,
-  HelpCircle,
-  FileJson,
-  FileWarning
+  Upload, 
+  X, 
+  RotateCcw, 
+  Sparkles,
+  Command
 } from 'lucide-react';
 
 export default function HeaderNav({ 
   activeTab, 
-  setActiveTab, 
+  onNavigateTab,
   firmInfo, 
-  onOpenReturnPrep, 
-  pendingCount,
-  autoPostRate
+  onOpenUpload,
+  onOpenTallyConnector,
+  onResetDemoData,
+  onOpenIntelligence,
+  pendingCount = 0,
+  isBackendConnected = false
 }) {
+  const [showHotkeys, setShowHotkeys] = useState(false);
+
+  const getBreadcrumbTitle = () => {
+    switch (activeTab) {
+      case 'today': return 'Today Briefing';
+      case 'clients': return 'Client Accounts';
+      case 'queue': return 'Universal Review Queue';
+      case 'bank-automation': return 'Bank & Rule 37 Settlement';
+      case 'reconciliation': return '3-Way Match (GSTR-2B)';
+      case 'returns': return 'Monthly Returns Filing';
+      case 'calendar': return 'Statutory Tax Calendar';
+      case 'analytics': return 'Practice Capacity & ROI';
+      case 'patterns': return 'Vendor Intelligence';
+      case 'policy': return 'Automation Policy';
+      case 'audit': return 'Audit Trail & Decision Replay';
+      case 'notices': return 'Tax Notice Assistant';
+      default: return 'Practice Operating System';
+    }
+  };
+
+  const hotkeys = [
+    { key: 'I', desc: 'Toggle Yukti Intelligence Drawer' },
+    { key: 'J', desc: 'Select next invoice in queue' },
+    { key: 'K', desc: 'Select previous invoice' },
+    { key: 'A', desc: 'Approve & post to Tally' },
+    { key: 'R', desc: 'Reject / flag invoice' },
+    { key: 'E', desc: 'Open inspector & edit ledgers' },
+    { key: 'P', desc: 'Open Investor Pitch Deck' },
+    { key: 'Esc', desc: 'Close active modal / drawer' },
+  ];
+
   return (
-    <header className="header-nav">
-      <div className="header-top">
-        <div className="brand-group">
-          <div className="brand-logo">
-            <Sparkles className="logo-icon" />
-            <span className="brand-name">Yukti</span>
-          </div>
-          <span className="brand-tag">CA Intelligence OS</span>
-          <div className="firm-selector">
-            <Building2 className="firm-icon" />
-            <span className="firm-name">{firmInfo.name}</span>
-            <span className="firm-badge">{firmInfo.totalClients} Clients</span>
-          </div>
-        </div>
-
-        <div className="header-actions">
-          <div className="period-pill">
-            <Calendar className="pill-icon" />
-            <span>Period: <strong>{firmInfo.activePeriod}</strong></span>
-            <span className="live-dot" title="Live Portal Connection Active"></span>
-          </div>
-
-          <button 
-            className="btn btn-secondary btn-kbd-help"
-            onClick={() => alert("Keyboard Shortcuts:\n\nJ : Select Next Item\nK : Select Previous Item\nA : Approve Item\nR : Reject Item\nE : Inspect & Edit Item\nEsc : Close Modals")}
-          >
-            <Keyboard className="btn-icon" />
-            <span>Shortcuts</span>
-            <kbd>J</kbd><kbd>K</kbd><kbd>A</kbd><kbd>R</kbd>
-          </button>
-
-          <button 
-            className="btn btn-primary btn-export"
-            onClick={onOpenReturnPrep}
-          >
-            <FileJson className="btn-icon" />
-            <span>Export Returns & Tally</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="header-bottom">
-        <nav className="nav-tabs">
-          <button 
-            className={`nav-tab ${activeTab === 'clients' ? 'active' : ''}`}
-            onClick={() => setActiveTab('clients')}
-          >
-            <Building2 className="tab-icon" />
-            <span>Client Practices</span>
-            <span className="tab-badge">{firmInfo.totalClients}</span>
-          </button>
-
-          <button 
-            className={`nav-tab ${activeTab === 'queue' ? 'active' : ''}`}
-            onClick={() => setActiveTab('queue')}
-          >
-            <CheckSquare className="tab-icon" />
-            <span>Exception Review Queue</span>
-            {pendingCount > 0 && (
-              <span className="tab-badge badge-amber-solid">{pendingCount}</span>
-            )}
-          </button>
-
-          <button 
-            className={`nav-tab ${activeTab === 'reconciliation' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reconciliation')}
-          >
-            <Layers className="tab-icon" />
-            <span>3-Pass Reconciliation</span>
-            <span className="tab-badge badge-green">96.8% Match</span>
-          </button>
-
-          <button 
-            className={`nav-tab ${activeTab === 'notices' ? 'active' : ''}`}
-            onClick={() => setActiveTab('notices')}
-          >
-            <FileWarning className="tab-icon" />
-            <span>Notices</span>
-            <span className="tab-badge badge-amber-solid">3</span>
-          </button>
-        </nav>
-
-        <div className="header-live-stats">
-          <div className="live-stat">
-            <span className="stat-label">AI Auto-Post Rate</span>
-            <span className="stat-val text-green">
-              <Zap className="inline-icon" /> {autoPostRate}%
+    <>
+      <header className="top-header" style={{ height: '52px', padding: '0 24px', background: '#FFFFFF', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 30 }}>
+        {/* Left: Friendly Clean Breadcrumb */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Yukti</span>
+          <span style={{ color: 'var(--border-color)' }}>/</span>
+          <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
+            {getBreadcrumbTitle()}
+          </span>
+          {pendingCount > 0 && activeTab === 'queue' && (
+            <span className="badge badge-warning" style={{ fontSize: '11px', padding: '1px 6px' }}>
+              {pendingCount} to review
             </span>
+          )}
+        </div>
+
+        {/* Center: Calm Intelligence Pill Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            onClick={onOpenIntelligence}
+            className="intelligence-pill-button"
+            title="Open Yukti Intelligence Drawer (Hotkey: I)"
+          >
+            <Sparkles size={13} className="text-brand" />
+            <span style={{ fontWeight: 600 }}>Yukti Intelligence</span>
+            <span className="badge badge-danger font-mono" style={{ fontSize: '10px', padding: '0 5px' }}>
+              6 Attention
+            </span>
+            <kbd style={{ fontSize: '9px', background: 'rgba(15, 90, 71, 0.1)', padding: '1px 4px', borderRadius: '3px', marginLeft: '4px' }}>I</kbd>
+          </button>
+
+          <button
+            onClick={onResetDemoData}
+            className="btn-ghost"
+            style={{ padding: '5px 8px', fontSize: '11px', color: 'var(--text-muted)' }}
+            title="Reset to pristine pilot dataset"
+          >
+            <RotateCcw size={12} />
+          </button>
+        </div>
+
+        {/* Right Tools: Clean & Functional */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="period-badge" style={{ padding: '4px 8px', fontSize: '11px' }}>
+            <Calendar size={12} />
+            <span>{firmInfo?.activePeriod || 'July 2026'}</span>
+            <span 
+              style={{ 
+                width: 6, 
+                height: 6, 
+                borderRadius: '50%', 
+                background: isBackendConnected ? '#10B981' : '#D97706', 
+                display: 'inline-block' 
+              }} 
+              title={isBackendConnected ? 'Backend Connected' : 'Local Demo Mode'} 
+            />
           </div>
-          <div className="live-stat">
-            <span className="stat-label">Sarvam OCR Engine</span>
-            <span className="stat-val text-indigo">22 Languages Active</span>
+
+          <button 
+            onClick={onOpenTallyConnector}
+            className="engine-pulse-active" 
+            style={{ 
+              fontSize: '11px', 
+              padding: '4px 9px', 
+              cursor: 'pointer',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              background: 'rgba(16, 185, 129, 0.08)'
+            }}
+            title="Desktop Tally Prime 4.1 Sync Active (Click to inspect)"
+          >
+            <span className="pulse-dot" />
+            <span>Tally 4.1 :9000</span>
+          </button>
+
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => setShowHotkeys(true)}
+            style={{ fontSize: '11px', padding: '5px 9px' }}
+            title="Keyboard Shortcuts"
+          >
+            <Keyboard size={13} />
+            <kbd style={{ fontSize: '9px', background: 'var(--bg-subtle)', padding: '1px 4px', borderRadius: '3px' }}>?</kbd>
+          </button>
+
+          <button className="btn btn-primary" onClick={onOpenUpload} style={{ fontSize: '11px', padding: '5px 11px' }}>
+            <Upload size={13} />
+            <span>+ Upload Invoices</span>
+          </button>
+        </div>
+      </header>
+
+      {showHotkeys && (
+        <div className="modal-overlay" onClick={() => setShowHotkeys(false)}>
+          <div className="modal-dialog" style={{ maxWidth: 420 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header-bar">
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Keyboard size={16} /> Keyboard Shortcuts
+              </h3>
+              <button className="btn-ghost btn" style={{ padding: '4px' }} onClick={() => setShowHotkeys(false)}>
+                <X size={16} />
+              </button>
+            </div>
+            <div className="modal-body-scroll" style={{ padding: '16px 20px' }}>
+              {hotkeys.map(({ key, desc }) => (
+                <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{desc}</span>
+                  <kbd style={{ padding: '2px 10px', borderRadius: '4px', background: 'var(--bg-subtle)', border: '1px solid var(--border-color)', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, fontSize: '12px', color: 'var(--text-primary)' }}>{key}</kbd>
+                </div>
+              ))}
+            </div>
+            <div className="modal-footer-bar" style={{ justifyContent: 'flex-end' }}>
+              <button className="btn btn-primary" onClick={() => setShowHotkeys(false)}>Got it</button>
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      )}
+    </>
   );
 }

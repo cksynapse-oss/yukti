@@ -1,271 +1,268 @@
 import React, { useState } from 'react';
-import { FileWarning, Upload, Calendar, IndianRupee, Clock, X, Download, Send, Sparkles, AlertTriangle } from 'lucide-react';
+import { 
+  FileWarning, 
+  Upload, 
+  Calendar, 
+  IndianRupee, 
+  Clock, 
+  X, 
+  Download, 
+  Send, 
+  Sparkles, 
+  AlertTriangle,
+  Copy,
+  Check,
+  Building2,
+  FileText,
+  ShieldAlert,
+  Loader2
+} from 'lucide-react';
 
-const NoticeAssistant = ({ notices = [] }) => {
+export default function NoticeAssistant({ notices = [] }) {
   const [selectedNotice, setSelectedNotice] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [isSimulatingUpload, setIsSimulatingUpload] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
 
-  const handleUploadClick = () => {
-    alert('Feature available in production build');
+  const handleCopyReply = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const closeModal = () => {
-    setSelectedNotice(null);
+  const handleSimulateNoticeUpload = () => {
+    setIsSimulatingUpload(true);
+    setTimeout(() => {
+      setIsSimulatingUpload(false);
+      // Open the first notice as newly parsed
+      if (notices.length > 0) {
+        setSelectedNotice(notices[0]);
+      }
+    }, 900);
   };
 
-  const getNoticeTypeColor = (type) => {
+  const handleDownloadDoc = (notice) => {
+    const textContent = `BEFORE THE SUPERINTENDENT OF CENTRAL GST & EXCISE
+RANGE-IV, DIVISION-MUMBAI WEST
+
+REPLY TO STATUTORY NOTICE: ${notice.noticeType}
+REFERENCE NUMBER: ZD2707260018921
+DATED: ${notice.noticeDate}
+
+IN THE MATTER OF:
+M/s Reliance Logistics Pvt Ltd
+GSTIN: ${notice.clientGstin}
+
+SUBJECT: ${notice.subject}
+
+RESPECTED SIR/MADAM,
+
+${notice.draftReply}
+
+PRAYER:
+In view of the above statutory facts, substantiated by certified purchase registers and GSTR-2B filing records, it is most respectfully prayed that the proposed demand of ₹${notice.demandAmount?.toLocaleString('en-IN')} be dropped in full without levy of interest or penalty.
+
+Yours faithfully,
+For Reliance Logistics Pvt Ltd
+
+(Authorized Signatory / Tax Practitioner)
+Date: 18th July 2026
+Place: Mumbai`;
+
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Statutory_Reply_${notice.noticeType}_${notice.clientGstin}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    setDownloadSuccess(true);
+    setTimeout(() => setDownloadSuccess(false), 2500);
+  };
+
+  const getNoticeBadge = (type) => {
     switch (type) {
-      case 'ASMT-10': return { bg: '#FEF3C7', color: '#92400E' }; // Amber
-      case 'DRC-01': return { bg: '#FEE2E2', color: '#991B1B' }; // Red
-      case 'DRC-07': return { bg: '#FECACA', color: '#7F1D1D' }; // Darker Red
-      default: return { bg: '#E0F2FE', color: '#075985' };
+      case 'ASMT-10':
+        return <span className="badge badge-warning">ASMT-10 (Scrutiny)</span>;
+      case 'DRC-01':
+        return <span className="badge badge-danger">DRC-01 (Show Cause)</span>;
+      default:
+        return <span className="badge badge-neutral">{type}</span>;
     }
   };
 
-  const getStatusColor = (status) => {
-    if (status.includes('Pending') || status.includes('Pending Reply')) return { bg: '#FEF3C7', color: '#92400E' }; // Amber
-    if (status.includes('Ready') || status.includes('Draft Ready')) return { bg: '#D1FAE5', color: '#065F46' }; // Green
-    if (status.includes('Urgent')) return { bg: '#FEE2E2', color: '#991B1B' }; // Red
-    return { bg: '#E5E7EB', color: '#374151' };
-  };
-
   return (
-    <div className="notice-container" style={{
-      '--bg-surface': '#F2F9F5',
-      '--bg-card': '#FFFFFF',
-      '--border-color': '#D1E7DD',
-      '--text-primary': '#062E24',
-      '--text-secondary': '#3D6B5E',
-      '--text-muted': '#6B8F82',
-      '--accent-green': '#0F5A47',
-      '--emerald': '#10B981',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      backgroundColor: 'var(--bg-surface)',
-      minHeight: '100vh',
-      padding: '2rem',
-      color: 'var(--text-primary)'
-    }}>
-      <style>{`
-        .notice-container { box-sizing: border-box; }
-        .notice-header { margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; }
-        .notice-title-area h1 { margin: 0 0 0.5rem 0; font-size: 2rem; color: var(--text-primary); }
-        .notice-title-area p { margin: 0; color: var(--text-secondary); font-size: 1.1rem; }
-        .sarvam-badge { display: flex; align-items: center; gap: 0.5rem; background-color: var(--accent-green); color: white; padding: 0.5rem 1rem; border-radius: 999px; font-weight: 500; font-size: 0.875rem; }
-        
-        .notice-upload-zone { border: 2px dashed var(--accent-green); border-radius: 12px; padding: 3rem; text-align: center; cursor: pointer; background-color: rgba(15, 90, 71, 0.03); transition: all 0.2s; margin-bottom: 2.5rem; }
-        .notice-upload-zone:hover { background-color: rgba(15, 90, 71, 0.08); border-color: var(--emerald); }
-        .notice-upload-zone svg { color: var(--accent-green); margin-bottom: 1rem; width: 48px; height: 48px; }
-        .notice-upload-zone p { margin: 0; color: var(--text-secondary); font-size: 1.2rem; font-weight: 500; }
-        
-        .notice-grid { display: flex; flex-direction: column; gap: 1.5rem; }
-        
-        .notice-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-        .notice-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
-        .badges-container { display: flex; gap: 0.75rem; }
-        .badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-        
-        .notice-subject { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0 0 1rem 0; line-height: 1.4; }
-        
-        .notice-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); }
-        .notice-meta-item { display: flex; align-items: center; gap: 0.5rem; }
-        .notice-meta-icon { color: var(--text-muted); width: 16px; height: 16px; flex-shrink: 0; }
-        .notice-meta-content { display: flex; flex-direction: column; }
-        .notice-meta-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-        .notice-meta-value { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; }
-        
-        .notice-description { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; }
-        
-        .notice-actions { display: flex; gap: 1rem; }
-        
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.625rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.2s; border: none; }
-        .btn-primary { background-color: var(--accent-green); color: white; }
-        .btn-primary:hover { background-color: var(--text-primary); }
-        .btn-secondary { background-color: var(--bg-surface); color: var(--accent-green); border: 1px solid var(--accent-green); }
-        .btn-secondary:hover { background-color: var(--accent-green); color: white; }
-        .btn-success { background-color: var(--emerald); color: white; }
-        .btn-success:hover { background-color: #059669; }
-        
-        .notice-detail-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(6, 46, 36, 0.6); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 2rem; backdrop-filter: blur(4px); }
-        .notice-detail-modal { background-color: var(--bg-card); border-radius: 16px; width: 100%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
-        .notice-detail-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-surface); }
-        .modal-title-area { display: flex; flex-direction: column; gap: 0.5rem; }
-        .close-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 0.5rem; border-radius: 50%; transition: background-color 0.2s; }
-        .close-btn:hover { background-color: rgba(0,0,0,0.05); color: var(--text-primary); }
-        
-        .notice-detail-body { padding: 2rem; overflow-y: auto; flex: 1; }
-        .draft-reply-section { margin-top: 2rem; }
-        .draft-reply-header { display: flex; align-items: center; gap: 0.5rem; color: var(--accent-green); margin-bottom: 1rem; font-weight: 600; font-size: 1.1rem; }
-        .draft-reply-box { background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 1.5rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.9rem; line-height: 1.6; color: #334155; white-space: pre-wrap; }
-        
-        .notice-detail-footer { padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 1rem; background-color: var(--bg-surface); }
-      `}</style>
-
-      <div className="notice-header">
-        <div className="notice-title-area">
-          <h1>GST Notice & Reply Assistant</h1>
-          <p>AI-assisted notice parsing and response drafting</p>
-        </div>
-        <div className="sarvam-badge">
-          <Sparkles size={18} />
-          Sarvam AI Powered
-        </div>
-      </div>
-
-      <div className="notice-upload-zone" onClick={handleUploadClick}>
-        <Upload />
-        <p>Drop a GST Notice PDF here or click to upload</p>
-      </div>
-
-      <div className="notice-grid">
-        {notices.map(notice => {
-          const typeColor = getNoticeTypeColor(notice.type);
-          const statusColor = getStatusColor(notice.status);
-
-          return (
-            <div key={notice.id} className="notice-card">
-              <div className="notice-card-header">
-                <div className="badges-container">
-                  <span className="badge notice-type-badge" style={{ backgroundColor: typeColor.bg, color: typeColor.color }}>
-                    {notice.type}
-                  </span>
-                  <span className="badge" style={{ backgroundColor: statusColor.bg, color: statusColor.color }}>
-                    {notice.status}
-                  </span>
-                </div>
-              </div>
-
-              <h2 className="notice-subject">{notice.subject}</h2>
-
-              <div className="notice-meta">
-                <div className="notice-meta-item">
-                  <div className="notice-meta-content">
-                    <span className="notice-meta-label">Client</span>
-                    <span className="notice-meta-value">{notice.clientName}</span>
-                  </div>
-                </div>
-                <div className="notice-meta-item">
-                  <div className="notice-meta-content">
-                    <span className="notice-meta-label">GSTIN</span>
-                    <span className="notice-meta-value" style={{ fontFamily: 'monospace' }}>{notice.gstin}</span>
-                  </div>
-                </div>
-                <div className="notice-meta-item">
-                  <Calendar className="notice-meta-icon" />
-                  <div className="notice-meta-content">
-                    <span className="notice-meta-label">Issue Date</span>
-                    <span className="notice-meta-value">{notice.issueDate}</span>
-                  </div>
-                </div>
-                <div className="notice-meta-item">
-                  <Clock className="notice-meta-icon" />
-                  <div className="notice-meta-content">
-                    <span className="notice-meta-label">Due Date</span>
-                    <span className="notice-meta-value">{notice.replyDueDate} ({notice.daysLeft} days left)</span>
-                  </div>
-                </div>
-                <div className="notice-meta-item">
-                  <IndianRupee className="notice-meta-icon" />
-                  <div className="notice-meta-content">
-                    <span className="notice-meta-label">Demand</span>
-                    <span className="notice-meta-value">{notice.demandAmount}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="notice-description">
-                {notice.description}
-              </div>
-
-              <div className="notice-actions">
-                <button className="btn btn-primary" onClick={() => setSelectedNotice(notice)}>
-                  <FileWarning size={18} />
-                  View Draft Reply
-                </button>
-                <button className="btn btn-secondary">
-                  <Download size={18} />
-                  Download PDF
-                </button>
-              </div>
-            </div>
-          );
-        })}
-        {notices.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-            No notices found. Upload a notice to get started.
+    <div className="view-container">
+      {/* Header */}
+      <div className="view-header">
+        <div>
+          <div className="view-pretitle">
+            <Sparkles size={14} className="text-brand" />
+            <span>AI Legal & Tax Intelligence (Sarvam 30B LLM)</span>
           </div>
+          <h1 className="view-title">GST Scrutiny Notice Assistant</h1>
+          <p className="view-subtitle">
+            Upload departmental scrutiny notices (ASMT-10, DRC-01, DRC-07) to extract allegations, auto-reconcile with books, and draft statutory replies.
+          </p>
+        </div>
+      </div>
+
+      {/* Upload Dropzone with Live Demo Simulation */}
+      <div 
+        className="panel" 
+        style={{ 
+          padding: '24px', 
+          textAlign: 'center', 
+          border: '2px dashed var(--border-color)', 
+          cursor: 'pointer',
+          backgroundColor: isSimulatingUpload ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+          transition: 'all 0.2s ease'
+        }}
+        onClick={handleSimulateNoticeUpload}
+        title="Click to simulate analyzing an ASMT-10 departmental notice PDF"
+      >
+        {isSimulatingUpload ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <Loader2 size={26} className="text-brand animate-spin" />
+            <strong className="text-sm text-primary">Sarvam Indic Vision Parsing ASMT-10 PDF...</strong>
+            <span className="text-xs text-muted">Extracting Section 16(2)(aa) discrepancy allegations & matching with GSTR-2B</span>
+          </div>
+        ) : (
+          <>
+            <Upload size={26} className="text-brand mx-auto mb-2" style={{ margin: '0 auto 6px', color: 'var(--brand)' }} />
+            <h4 className="font-semibold text-primary" style={{ fontSize: '13px' }}>
+              Drag & drop departmental notice PDF or <span className="text-brand underline">Click for Live Pilot Demo</span>
+            </h4>
+            <p className="text-xs text-muted mt-1">Supports ASMT-10, DRC-01, DRC-07 PDFs in English, Hindi, and regional Indic scripts.</p>
+          </>
         )}
       </div>
 
+      {/* Active Notices List */}
+      <div className="panel">
+        <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <span className="panel-title">Active Departmental Notices ({notices.length})</span>
+            <span className="text-xs text-muted" style={{ marginLeft: '8px' }}>Auto-reconciled against books</span>
+          </div>
+          <span className="badge badge-neutral" style={{ fontSize: '10px' }}>Sarvam 30B Active</span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {notices.map(notice => (
+            <div 
+              key={notice.id}
+              style={{ 
+                padding: '16px 20px', 
+                borderBottom: '1px solid var(--border-color)', 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'flex-start', 
+                gap: '16px' 
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  {getNoticeBadge(notice.noticeType)}
+                  <span className="font-semibold text-primary">{notice.clientName}</span>
+                  <span className="font-mono text-xs text-muted">({notice.clientGstin})</span>
+                </div>
+
+                <h4 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                  {notice.subject}
+                </h4>
+
+                <p className="text-xs text-secondary mb-2" style={{ lineHeight: 1.5 }}>
+                  {notice.description}
+                </p>
+
+                <div style={{ display: 'flex', gap: '16px', fontSize: '11px', color: 'var(--text-muted)' }}>
+                  <span>Authority: <strong>{notice.issuingAuthority}</strong></span>
+                  <span>Issued: <strong>{notice.noticeDate}</strong></span>
+                  <span>Deadline: <strong className="text-red font-semibold">{notice.responseDeadline}</strong></span>
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                <div className="text-right">
+                  <span className="text-xs text-muted block">Alleged Tax Demand</span>
+                  <span className="font-mono font-bold text-red text-sm">₹{notice.demandAmount?.toLocaleString('en-IN')}</span>
+                </div>
+
+                <button 
+                  className="btn btn-primary text-xs"
+                  onClick={() => setSelectedNotice(notice)}
+                >
+                  <FileText size={13} />
+                  <span>Review AI Legal Reply</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Notice Detail & Draft Reply Modal */}
       {selectedNotice && (
-        <div className="notice-detail-overlay" onClick={closeModal}>
-          <div className="notice-detail-modal" onClick={e => e.stopPropagation()}>
-            <div className="notice-detail-header">
-              <div className="modal-title-area">
-                <div className="badges-container">
-                  <span className="badge notice-type-badge" style={{ 
-                    backgroundColor: getNoticeTypeColor(selectedNotice.type).bg, 
-                    color: getNoticeTypeColor(selectedNotice.type).color 
-                  }}>
-                    {selectedNotice.type}
-                  </span>
+        <div className="modal-overlay" onClick={() => setSelectedNotice(null)}>
+          <div className="modal-dialog" style={{ maxWidth: '820px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-bar">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ShieldAlert size={18} className="text-brand" />
+                <div>
+                  <h3>AI-Drafted Statutory Response: {selectedNotice.noticeType}</h3>
+                  <span className="text-xs text-muted">{selectedNotice.clientName} • Alleged Demand: ₹{selectedNotice.demandAmount?.toLocaleString('en-IN')}</span>
                 </div>
-                <h2 className="notice-subject" style={{ margin: 0 }}>{selectedNotice.subject}</h2>
-              </div>
-              <button className="close-btn" onClick={closeModal}>
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className="notice-detail-body">
-              <div className="notice-meta">
-                <div className="notice-meta-item">
-                  <div className="notice-meta-content">
-                    <span className="notice-meta-label">Client</span>
-                    <span className="notice-meta-value">{selectedNotice.clientName}</span>
-                  </div>
-                </div>
-                <div className="notice-meta-item">
-                  <div className="notice-meta-content">
-                    <span className="notice-meta-label">GSTIN</span>
-                    <span className="notice-meta-value" style={{ fontFamily: 'monospace' }}>{selectedNotice.gstin}</span>
-                  </div>
-                </div>
-                <div className="notice-meta-item">
-                  <div className="notice-meta-content">
-                    <span className="notice-meta-label">Due Date</span>
-                    <span className="notice-meta-value">{selectedNotice.replyDueDate}</span>
-                  </div>
-                </div>
-                <div className="notice-meta-item">
-                  <div className="notice-meta-content">
-                    <span className="notice-meta-label">Demand</span>
-                    <span className="notice-meta-value">{selectedNotice.demandAmount}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="notice-description" style={{ marginTop: '1.5rem', marginBottom: '0' }}>
-                <strong>Description:</strong> {selectedNotice.description}
               </div>
 
-              <div className="draft-reply-section">
-                <div className="draft-reply-header">
-                  <Sparkles size={20} />
-                  AI Generated Draft Reply
+              <button className="btn-icon-action" onClick={() => setSelectedNotice(null)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="modal-body-scroll" style={{ padding: '20px' }}>
+              <div className="vendor-pattern-banner mb-4" style={{ marginBottom: '14px' }}>
+                <Sparkles size={16} className="text-brand mr-1" />
+                <div className="text-xs">
+                  <strong>Sarvam 30B Legal Grounding:</strong> Reconciled with Tally purchase vouchers #RIL/2026/0892 and Section 16(4) statutory time-limits.
                 </div>
-                <div className="draft-reply-box">
-                  {selectedNotice.draftReply}
-                </div>
+              </div>
+
+              <div style={{ 
+                backgroundColor: '#0D1117', 
+                border: '1px solid #30363D', 
+                borderRadius: '6px', 
+                padding: '16px', 
+                fontFamily: 'JetBrains Mono, monospace', 
+                fontSize: '11px', 
+                whiteSpace: 'pre-wrap', 
+                lineHeight: 1.6, 
+                color: '#E6EDF3',
+                maxHeight: '340px',
+                overflowY: 'auto'
+              }}>
+                {selectedNotice.draftReply}
               </div>
             </div>
 
-            <div className="notice-detail-footer">
-              <button className="btn btn-secondary" onClick={closeModal}>
-                <Download size={18} />
-                Download Draft Reply
+            <div className="modal-footer-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button 
+                className="btn btn-secondary"
+                onClick={() => handleCopyReply(selectedNotice.draftReply)}
+              >
+                {copied ? <Check size={14} className="text-green" /> : <Copy size={14} />}
+                <span>{copied ? "Copied Legal Text!" : "Copy Reply Text"}</span>
               </button>
-              <button className="btn btn-success" onClick={closeModal}>
-                <Send size={18} />
-                Send to Client for Review
+
+              <button 
+                className="btn btn-primary"
+                onClick={() => handleDownloadDoc(selectedNotice)}
+              >
+                {downloadSuccess ? <Check size={14} /> : <Download size={14} />}
+                <span>{downloadSuccess ? "Document Downloaded!" : "Download Statutory Reply (.TXT)"}</span>
               </button>
             </div>
           </div>
@@ -273,6 +270,4 @@ const NoticeAssistant = ({ notices = [] }) => {
       )}
     </div>
   );
-};
-
-export default NoticeAssistant;
+}

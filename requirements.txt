@@ -4,3 +4,26 @@ python-dotenv>=1.0.1
 Pillow>=10.3.0
 typing-extensions>=4.11.0
 rich>=13.7.1
+
+# FastAPI server & Auth
+fastapi
+uvicorn[standard]
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
+
+# Database
+sqlalchemy[asyncio]>=2.0.0
+aiosqlite
+asyncpg
+
+# Reconciliation & Excel
+duckdb
+pandas
+openpyxl
+rapidfuzz
+
+# Testing
+pytest
+pytest-asyncio
