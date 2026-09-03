@@ -41,24 +41,25 @@ from src.routers.tally_connector import router as tally_connector_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize all database tables
-    await init_db()
+    try:
+        # Initialize all database tables
+        await init_db()
 
-    # Seed initial pilot firm and default entities if DB is fresh
-    async with async_session() as session:
-        # Check if firm exists
-        res = await session.execute(select(YuktiFirm).where(YuktiFirm.id == "firm_default"))
-        firm = res.scalars().first()
-        if not firm:
-            firm = YuktiFirm(
-                id="firm_default",
-                name="Rajnish & Associates (Chartered Accountants)",
-                pan="AAACR5055K",
-                gstin="27AAACR5055K1Z2",
-                subscription_tier="pilot",
-                subscription_status="active"
-            )
-            session.add(firm)
+        # Seed initial pilot firm and default entities if DB is fresh
+        async with async_session() as session:
+            # Check if firm exists
+            res = await session.execute(select(YuktiFirm).where(YuktiFirm.id == "firm_default"))
+            firm = res.scalars().first()
+            if not firm:
+                firm = YuktiFirm(
+                    id="firm_default",
+                    name="Rajnish & Associates (Chartered Accountants)",
+                    pan="AAACR5055K",
+                    gstin="27AAACR5055K1Z2",
+                    subscription_tier="pilot",
+                    subscription_status="active"
+                )
+                session.add(firm)
 
         # Check if principal user exists
         user_res = await session.execute(select(YuktiUser).where(YuktiUser.email == "rajnish@yukti.ai"))
@@ -306,6 +307,8 @@ async def lifespan(app: FastAPI):
                 session.add(inv)
 
         await session.commit()
+    except Exception as e:
+        print(f"[WARN] Database initialization skipped or deferred: {e}")
 
     yield
 
@@ -316,6 +319,15 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+@app.get("/")
+async def root():
+    return {
+        "status": "online",
+        "service": "Yukti CA Intelligence OS API",
+        "version": "2026.07",
+        "health": "/api/v1/health"
+    }
 
 # Enable CORS for frontend
 app.add_middleware(
