@@ -113,6 +113,7 @@ export default function Sidebar({
                   key={item.id}
                   className={`nav-item${isActive ? ' active' : ''}`}
                   onClick={() => setActiveTab(item.id)}
+                  aria-current={isActive ? 'page' : undefined}
                 >
                   <div className="nav-item-content">
                     <Icon size={15} />

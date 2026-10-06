@@ -1,74 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   CheckCircle2, 
   AlertTriangle, 
-  XCircle, 
-  Percent, 
   Search, 
-  FileText, 
   Send, 
-  ArrowRight,
-  Sparkles,
-  GitCompare,
-  TrendingUp,
-  Download,
-  RefreshCw
+  GitCompare, 
+  TrendingUp, 
+  Download, 
+  RefreshCw,
+  Percent,
+  Check
 } from 'lucide-react';
 
 export default function ReconciliationView({ 
   reconData, 
   onOpenVendorFollowup,
-  onOpenReconModal 
+  onOpenReconModal,
+  onShowToast 
 }) {
   const [filterCategory, setFilterCategory] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+  const [density, setDensity] = useState('compact'); // 'compact' | 'comfortable'
+  const [tolerance, setTolerance] = useState(100); // 0 | 50 | 100
 
-  if (!reconData) return null;
-  const { summary, records = [] } = reconData;
+  const summary = reconData?.summary || {};
+  const records = reconData?.records;
 
-  const filteredRecords = records.filter(r => {
-    const matchesCat = 
-      filterCategory === 'ALL' ? true :
-      filterCategory === 'EXACT_MATCH' ? r.category === 'EXACT_MATCH' :
-      filterCategory === 'NEAR_MATCH' ? r.category === 'NEAR_MATCH' :
-      filterCategory === 'IN_BOOKS_ONLY' ? r.category === 'IN_BOOKS_ONLY' :
-      filterCategory === 'AMOUNT_MISMATCH' ? r.category === 'AMOUNT_MISMATCH' :
-      filterCategory === 'TAX_RATE_MISMATCH' ? r.category === 'TAX_RATE_MISMATCH' :
-      filterCategory === 'ON_PORTAL_ONLY' ? r.category === 'ON_PORTAL_ONLY' : true;
+  // Filter records based on category and search
+  const filteredRecords = useMemo(() => {
+    if (!records) return [];
+    return records.filter(r => {
+      const matchesCat = 
+        filterCategory === 'ALL' ? true :
+        filterCategory === 'EXACT_MATCH' ? r.category === 'EXACT_MATCH' :
+        filterCategory === 'NEAR_MATCH' ? r.category === 'NEAR_MATCH' :
+        filterCategory === 'IN_BOOKS_ONLY' ? r.category === 'IN_BOOKS_ONLY' :
+        filterCategory === 'AMOUNT_MISMATCH' ? r.category === 'AMOUNT_MISMATCH' :
+        filterCategory === 'TAX_RATE_MISMATCH' ? r.category === 'TAX_RATE_MISMATCH' :
+        filterCategory === 'ON_PORTAL_ONLY' ? r.category === 'ON_PORTAL_ONLY' : true;
 
-    const matchesSearch = 
-      (r.supplierName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (r.supplierGstin || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (r.invoiceNo || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const q = searchTerm.toLowerCase().trim();
+      const matchesSearch = !q ||
+        (r.supplierName || '').toLowerCase().includes(q) ||
+        (r.supplierGstin || '').toLowerCase().includes(q) ||
+        (r.invoiceNo || '').toLowerCase().includes(q);
 
-    return matchesCat && matchesSearch;
-  });
+      return matchesCat && matchesSearch;
+    });
+  }, [records, filterCategory, searchTerm]);
 
   const getStatusBadge = (category) => {
     switch (category) {
       case 'EXACT_MATCH':
-        return <span className="badge badge-success">Exact Match</span>;
+        return <span className="badge badge-success font-mono" style={{ fontSize: '10px' }}>Exact Match</span>;
       case 'NEAR_MATCH':
-        return <span className="badge badge-brand">Near Match (&lt;₹100)</span>;
+        return <span className="badge badge-brand font-mono" style={{ fontSize: '10px' }}>Near Match (&lt;₹{tolerance})</span>;
       case 'IN_BOOKS_ONLY':
-        return <span className="badge badge-danger">Missing in 2B</span>;
+        return <span className="badge badge-danger font-mono" style={{ fontSize: '10px' }}>Missing in 2B</span>;
       case 'TAX_RATE_MISMATCH':
-        return <span className="badge badge-warning">Rate Mismatch</span>;
+        return <span className="badge badge-warning font-mono" style={{ fontSize: '10px' }}>Rate Mismatch</span>;
       case 'AMOUNT_MISMATCH':
-        return <span className="badge badge-warning">Amount Mismatch</span>;
+        return <span className="badge badge-warning font-mono" style={{ fontSize: '10px' }}>Amount Mismatch</span>;
       case 'ON_PORTAL_ONLY':
-        return <span className="badge badge-info">On Portal Only</span>;
-      case 'DUPLICATE':
-        return <span className="badge badge-danger">Duplicate In Books</span>;
+        return <span className="badge badge-info font-mono" style={{ fontSize: '10px' }}>On Portal Only</span>;
       default:
-        return <span className="badge badge-neutral">{category}</span>;
+        return <span className="badge badge-neutral font-mono" style={{ fontSize: '10px' }}>{category}</span>;
     }
   };
 
-  const handleExportExcel = () => {
-    // Generate clean client-side CSV export of all reconciled transactions
-    const headers = ["ID", "Supplier Name", "Supplier GSTIN", "Invoice No", "Invoice Date", "Books Amount (₹)", "Portal Amount (₹)", "Diff (₹)", "Books Tax (₹)", "Portal Tax (₹)", "Category", "Status", "ITC Eligibility", "Action Required"];
-    const rows = records.map(r => [
+  const handleExportCSV = () => {
+    const headers = ["ID", "Supplier Name", "Supplier GSTIN", "Invoice No", "Invoice Date", "Books Amount (₹)", "Portal Amount (₹)", "Variance (₹)", "Category", "Status", "ITC Eligibility", "Action"];
+    const rows = filteredRecords.map(r => [
       `"${r.id || ''}"`,
       `"${(r.supplierName || '').replace(/"/g, '""')}"`,
       `"${r.supplierGstin || ''}"`,
@@ -77,8 +79,6 @@ export default function ReconciliationView({
       r.bookAmount || 0,
       r.portalAmount || 0,
       r.diffAmount || 0,
-      r.bookTax || 0,
-      r.portalTax || 0,
       `"${r.category || ''}"`,
       `"${r.status || ''}"`,
       `"${r.itcEligibility || ''}"`,
@@ -89,49 +89,95 @@ export default function ReconciliationView({
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Yukti_GSTR2B_Reconciliation_July2026.csv`);
+    link.setAttribute("download", `Yukti_Reconciliation_${filterCategory}_July2026.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    if (onShowToast) onShowToast("Reconciliation CSV downloaded successfully");
   };
 
   return (
     <div className="view-container">
-      {/* Header with Plain, Friendly English */}
-      <div className="view-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+      {/* Top Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '14px' }}>
         <div>
-          <div className="view-pretitle">
+          <div className="view-pretitle" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <GitCompare size={14} className="text-brand" />
-            <span>Automatic Bill Matching</span>
+            <span style={{ fontWeight: 700, letterSpacing: '0.04em' }}>AUTOMATED 3-WAY RECONCILIATION ENGINE</span>
           </div>
-          <h1 className="view-title">Match Supplier Bills with Govt Portal</h1>
-          <p className="view-subtitle">
-            Compare your Tally purchase bills against government GSTR-2B inward statements to claim full tax credits safely.
+          <h1 className="view-title" style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>
+            3-Way Match Matrix (Books vs. GSTR-2B Portal)
+          </h1>
+          <p className="view-subtitle" style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+            High-throughput DuckDB matching of Tally purchase vouchers against government GSTR-2B statements.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn btn-secondary" onClick={handleExportExcel} title="Download verified reconciliation CSV">
-            <Download size={14} />
-            <span>Export CSV</span>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Density Switcher */}
+          <div style={{ display: 'flex', background: 'var(--bg-subtle)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '2px' }}>
+            <button
+              onClick={() => setDensity('compact')}
+              style={{
+                border: 'none',
+                background: density === 'compact' ? '#FFFFFF' : 'transparent',
+                color: density === 'compact' ? 'var(--text-primary)' : 'var(--text-muted)',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                fontSize: '11px',
+                fontWeight: density === 'compact' ? 600 : 500,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+              title="Compact rows (high data density)"
+            >
+              Compact
+            </button>
+            <button
+              onClick={() => setDensity('comfortable')}
+              style={{
+                border: 'none',
+                background: density === 'comfortable' ? '#FFFFFF' : 'transparent',
+                color: density === 'comfortable' ? 'var(--text-primary)' : 'var(--text-muted)',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                fontSize: '11px',
+                fontWeight: density === 'comfortable' ? 600 : 500,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+              title="Comfortable row padding"
+            >
+              Comfortable
+            </button>
+          </div>
+
+          <button className="btn btn-secondary" onClick={handleExportCSV} title="Export verified CSV report" aria-label="Export verified reconciliation records to CSV">
+            <Download size={13} />
+            <span style={{ fontSize: '11.5px' }}>Export CSV</span>
           </button>
           
-          <button className="btn btn-primary" onClick={onOpenReconModal}>
-            <RefreshCw size={14} />
+          <button className="btn btn-primary" onClick={onOpenReconModal} style={{ fontSize: '11.5px' }} aria-label="Run DuckDB 3-way matching engine">
+            <RefreshCw size={13} />
             <span>Run Matching</span>
           </button>
         </div>
       </div>
 
-      {/* KPI Cards: Clean, Plain English */}
+      {/* KPI Cards */}
       <div className="kpi-grid">
         <div className="kpi-card" style={{ borderLeft: '3px solid var(--success)' }}>
           <div className="kpi-icon-wrapper text-green">
             <CheckCircle2 size={18} />
           </div>
           <div className="kpi-data">
-            <span className="kpi-label">Safe Tax Credit (ITC)</span>
-            <h3 className="kpi-value text-green">₹{((summary.totalEligibleITC || 4256000) / 100000).toFixed(2)}L</h3>
-            <span className="kpi-subtext font-mono text-green">Verified on government portal</span>
+            <span className="kpi-label">Verified Tax Credit (ITC)</span>
+            <h3 className="kpi-value text-green font-mono">₹{((summary.totalEligibleITC || 4256000) / 100000).toFixed(2)}L</h3>
+            <span className="kpi-subtext text-green font-medium">Auto-populated on portal</span>
           </div>
         </div>
 
@@ -140,9 +186,9 @@ export default function ReconciliationView({
             <AlertTriangle size={18} />
           </div>
           <div className="kpi-data">
-            <span className="kpi-label">Bills Missing on Portal</span>
-            <h3 className="kpi-value text-red">₹{((summary.missingIn2BITC || 388500) / 1000).toFixed(1)}k</h3>
-            <span className="kpi-subtext text-red"><strong>{summary.inBooksOnlyCount || 50}</strong> suppliers haven't filed yet</span>
+            <span className="kpi-label">Bills Missing in 2B</span>
+            <h3 className="kpi-value text-red font-mono">₹{((summary.missingIn2BITC || 388500) / 1000).toFixed(1)}k</h3>
+            <span className="kpi-subtext text-red"><strong>{summary.inBooksOnlyCount || 50}</strong> delinquent suppliers</span>
           </div>
         </div>
 
@@ -151,9 +197,9 @@ export default function ReconciliationView({
             <Percent size={18} />
           </div>
           <div className="kpi-data">
-            <span className="kpi-label">Tax Rate Differences</span>
-            <h3 className="kpi-value text-amber">₹{((summary.rateMismatchITC || 84000) / 1000).toFixed(1)}k</h3>
-            <span className="kpi-subtext">Discrepancies to resolve</span>
+            <span className="kpi-label">Rate / Tax Discrepancies</span>
+            <h3 className="kpi-value text-amber font-mono">₹{((summary.rateMismatchITC || 84000) / 1000).toFixed(1)}k</h3>
+            <span className="kpi-subtext">Tax calculation differences</span>
           </div>
         </div>
 
@@ -162,51 +208,109 @@ export default function ReconciliationView({
             <TrendingUp size={18} />
           </div>
           <div className="kpi-data">
-            <span className="kpi-label">Overall Match Rate</span>
-            <h3 className="kpi-value">{summary.matchRatePct || 96.0}%</h3>
+            <span className="kpi-label">Automated Match Rate</span>
+            <h3 className="kpi-value font-mono">{summary.matchRatePct || 96.0}%</h3>
             <span className="kpi-subtext"><strong>{(summary.exactMatchCount || 1042) + (summary.nearMatchCount || 98)}</strong> of {summary.totalCount || 1248} bills</span>
           </div>
         </div>
       </div>
 
-      {/* Slim, Visual Matching Progress Bar */}
-      <div className="matching-telemetry-bar">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
-          <span style={{ fontWeight: 600 }}>Matching Breakdown (1,248 Bills Processed in 1.18s)</span>
-          <span className="font-mono text-green" style={{ fontWeight: 600 }}>95.1% Auto-Resolved</span>
+      {/* INTERACTIVE MATCH FUNNEL RIBBON */}
+      <div className="matching-telemetry-bar" style={{ background: '#FFFFFF', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '14px 18px', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Match Confidence Funnel (1,248 Bills Processed in 1.18s)
+            </span>
+            <span className="badge badge-success font-mono" style={{ fontSize: '10px' }}>
+              95.1% Auto-Resolved
+            </span>
+          </div>
+
+          {/* Tolerance Stepper */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
+            <span style={{ color: 'var(--text-muted)' }}>Round-off Tolerance:</span>
+            {[0, 50, 100].map(val => (
+              <button
+                key={val}
+                onClick={() => setTolerance(val)}
+                className={`btn btn-secondary font-mono ${tolerance === val ? 'bg-subtle font-bold border-brand text-brand' : ''}`}
+                style={{ padding: '2px 7px', fontSize: '10px', height: '22px' }}
+              >
+                ₹{val}
+              </button>
+            ))}
+          </div>
         </div>
         
-        <div className="matching-bar-track">
-          <div className="matching-bar-segment exact" style={{ width: '83.5%' }} title="Pass 1: Exact Match (83.5%)" />
-          <div className="matching-bar-segment fuzzy" style={{ width: '7.8%' }} title="Pass 2: Smart Name/Invoice Match (7.8%)" />
-          <div className="matching-bar-segment tolerance" style={{ width: '3.8%' }} title="Pass 3: Rounding Tolerance (3.8%)" />
-          <div className="matching-bar-segment missing" style={{ width: '4.9%' }} title="Missing on Govt Portal (4.9%)" />
+        {/* Visual Progress Bar Track */}
+        <div className="matching-bar-track" style={{ height: '10px', borderRadius: '5px', overflow: 'hidden', display: 'flex', cursor: 'pointer' }}>
+          <div 
+            className="matching-bar-segment exact" 
+            style={{ width: '83.5%', background: '#10B981', transition: 'opacity 0.15s ease', opacity: filterCategory === 'EXACT_MATCH' || filterCategory === 'ALL' ? 1 : 0.4 }} 
+            onClick={() => setFilterCategory('EXACT_MATCH')}
+            title="Pass 1: Exact Match (83.5%) - Click to filter"
+          />
+          <div 
+            className="matching-bar-segment fuzzy" 
+            style={{ width: '7.8%', background: '#3B82F6', transition: 'opacity 0.15s ease', opacity: filterCategory === 'NEAR_MATCH' || filterCategory === 'ALL' ? 1 : 0.4 }} 
+            onClick={() => setFilterCategory('NEAR_MATCH')}
+            title="Pass 2: Near / Rounding Match (7.8%) - Click to filter" 
+          />
+          <div 
+            className="matching-bar-segment tolerance" 
+            style={{ width: '3.8%', background: '#F59E0B', transition: 'opacity 0.15s ease', opacity: filterCategory === 'TAX_RATE_MISMATCH' || filterCategory === 'AMOUNT_MISMATCH' || filterCategory === 'ALL' ? 1 : 0.4 }} 
+            onClick={() => setFilterCategory('TAX_RATE_MISMATCH')}
+            title="Pass 3: Rate / Amount Differences (3.8%) - Click to filter" 
+          />
+          <div 
+            className="matching-bar-segment missing" 
+            style={{ width: '4.9%', background: '#EF4444', transition: 'opacity 0.15s ease', opacity: filterCategory === 'IN_BOOKS_ONLY' || filterCategory === 'ALL' ? 1 : 0.4 }} 
+            onClick={() => setFilterCategory('IN_BOOKS_ONLY')}
+            title="Missing on Government Portal (4.9%) - Click to filter" 
+          />
         </div>
 
-        <div className="matching-bar-legend">
-          <div className="matching-legend-item">
-            <span className="matching-legend-dot" style={{ background: '#10B981' }} />
-            <span>Exact: <strong>83.5%</strong> (1,042)</span>
-          </div>
-          <div className="matching-legend-item">
-            <span className="matching-legend-dot" style={{ background: '#3B82F6' }} />
-            <span>Smart Match: <strong>7.8%</strong> (98)</span>
-          </div>
-          <div className="matching-legend-item">
-            <span className="matching-legend-dot" style={{ background: '#F59E0B' }} />
-            <span>Rounding: <strong>3.8%</strong> (48)</span>
-          </div>
-          <div className="matching-legend-item">
-            <span className="matching-legend-dot" style={{ background: '#EF4444' }} />
-            <span className="text-red">Missing on Portal: <strong>4.9%</strong> (50)</span>
-          </div>
+        {/* Clickable Legend Filter Chips */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginTop: '10px', fontSize: '11px' }}>
+          <button 
+            onClick={() => setFilterCategory('EXACT_MATCH')}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', color: filterCategory === 'EXACT_MATCH' ? '#065F46' : 'var(--text-secondary)' }}
+          >
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981' }} />
+            <span>Exact Match: <strong className="font-mono">83.5%</strong> (1,042)</span>
+          </button>
+          
+          <button 
+            onClick={() => setFilterCategory('NEAR_MATCH')}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', color: filterCategory === 'NEAR_MATCH' ? '#1E40AF' : 'var(--text-secondary)' }}
+          >
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3B82F6' }} />
+            <span>Near Match (&lt;₹{tolerance}): <strong className="font-mono">7.8%</strong> (98)</span>
+          </button>
+
+          <button 
+            onClick={() => setFilterCategory('TAX_RATE_MISMATCH')}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', color: filterCategory === 'TAX_RATE_MISMATCH' ? '#92400E' : 'var(--text-secondary)' }}
+          >
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#F59E0B' }} />
+            <span>Rate Differences: <strong className="font-mono">3.8%</strong> (48)</span>
+          </button>
+
+          <button 
+            onClick={() => setFilterCategory('IN_BOOKS_ONLY')}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', color: filterCategory === 'IN_BOOKS_ONLY' ? '#991B1B' : 'var(--text-secondary)' }}
+          >
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#EF4444' }} />
+            <span style={{ color: '#DC2626' }}>Missing in 2B: <strong className="font-mono">4.9%</strong> (50)</span>
+          </button>
         </div>
       </div>
 
       {/* Main Reconciliation Table Panel */}
-      <div className="panel">
-        {/* Filter Tabs & Search */}
-        <div className="panel-toolbar flex-wrap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+      <div className="panel" style={{ background: '#FFFFFF', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+        {/* Filter Tabs & Search Bar */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', padding: '12px 16px', borderBottom: '1px solid var(--border-color)', background: '#FFFFFF' }}>
           <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
             {[
               { id: 'ALL', label: 'All Records' },
@@ -228,95 +332,129 @@ export default function ReconciliationView({
             ))}
           </div>
 
-          <div className="search-input-wrapper">
-            <Search size={14} className="search-icon" />
-            <input 
-              type="text" 
-              placeholder="Filter vendor, GSTIN, invoice #..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="search-input-wrapper">
+              <Search size={14} className="search-icon" />
+              <input 
+                type="text" 
+                placeholder="Search vendor, GSTIN, invoice #..." 
+                aria-label="Search reconciliation records by vendor, GSTIN, or invoice number"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+              Showing {filteredRecords.length} of {records.length}
+            </span>
           </div>
         </div>
 
-        {/* Data Table */}
-        <div className="table-responsive">
-          <table className="data-table">
+        {/* Data Table with Sticky Headers & Delta Highlighting */}
+        <div className="table-responsive" style={{ maxHeight: '520px', overflowY: 'auto' }}>
+          <table className={`data-table ${density} table-sticky-header`}>
             <thead>
               <tr>
-                <th>Vendor / Supplier</th>
-                <th>GSTIN</th>
+                <th className="table-sticky-col">Vendor / Supplier</th>
+                <th>Supplier GSTIN</th>
                 <th>Invoice #</th>
                 <th>Date</th>
-                <th className="text-right">Books Total (₹)</th>
-                <th className="text-right">GSTR-2B Total (₹)</th>
-                <th className="text-right">Variance (₹)</th>
+                <th style={{ textAlign: 'right' }}>Books Total (₹)</th>
+                <th style={{ textAlign: 'right' }}>GSTR-2B Total (₹)</th>
+                <th style={{ textAlign: 'right' }}>Variance / Delta</th>
                 <th>Recon Status</th>
                 <th>ITC Eligibility</th>
-                <th className="text-right">Action</th>
+                <th style={{ textAlign: 'right' }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-8 text-muted">
+                  <td colSpan={10} style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--text-muted)' }}>
                     No reconciliation records found for this filter.
                   </td>
                 </tr>
               ) : (
-                filteredRecords.map(r => (
-                  <tr key={r.id}>
-                    <td>
-                      <div className="font-semibold text-primary">{r.supplierName}</div>
-                    </td>
-                    <td>
-                      <span className="font-mono text-xs">{r.supplierGstin}</span>
-                    </td>
-                    <td>
-                      <span className="font-mono text-xs">{r.invoiceNo}</span>
-                    </td>
-                    <td className="text-xs text-secondary">{r.invoiceDate}</td>
-                    <td className="text-right font-mono font-medium">
-                      ₹{r.bookAmount?.toLocaleString('en-IN')}
-                    </td>
-                    <td className="text-right font-mono font-medium">
-                      ₹{r.portalAmount?.toLocaleString('en-IN')}
-                    </td>
-                    <td className={`text-right font-mono font-semibold ${r.diffAmount !== 0 ? 'text-red' : 'text-muted'}`}>
-                      {r.diffAmount === 0 ? '₹0' : `₹${r.diffAmount?.toLocaleString('en-IN')}`}
-                    </td>
-                    <td>{getStatusBadge(r.category)}</td>
-                    <td>
-                      <span className="text-xs text-secondary font-medium">
-                        {r.itcEligibility}
-                      </span>
-                    </td>
-                    <td className="text-right">
-                      {r.category === 'IN_BOOKS_ONLY' ? (
-                        <button 
-                          className="btn btn-secondary text-xs" 
-                          style={{ padding: '3px 8px' }}
-                          onClick={() => onOpenVendorFollowup?.({
-                            supplierName: r.supplierName,
-                            supplierGstin: r.supplierGstin,
-                            customerName: "Client Company",
-                            invoiceNo: r.invoiceNo,
-                            invoiceDate: r.invoiceDate,
-                            grandTotal: r.bookAmount,
-                            issueTag: "Missing in 2B",
-                            issueDescription: "Invoice in books but unfiled in GSTR-1 by vendor."
-                          })}
-                        >
-                          <Send size={11} />
-                          <span>Follow-up</span>
-                        </button>
-                      ) : (
-                        <span className="text-xs text-muted">Reconciled</span>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                filteredRecords.map(r => {
+                  const hasDiff = r.diffAmount !== 0;
+                  const isMissing = r.category === 'IN_BOOKS_ONLY';
+
+                  return (
+                    <tr key={r.id}>
+                      <td className="table-sticky-col">
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+                          {r.supplierName}
+                        </div>
+                      </td>
+                      <td>
+                        <span className="font-mono text-xs">{r.supplierGstin}</span>
+                      </td>
+                      <td>
+                        <span className="font-mono text-xs">{r.invoiceNo}</span>
+                      </td>
+                      <td style={{ fontSize: '11.5px', color: 'var(--text-secondary)' }}>
+                        {r.invoiceDate}
+                      </td>
+                      <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+                        ₹{Number(r.bookAmount || 0).toLocaleString('en-IN')}
+                      </td>
+                      <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 600, color: isMissing ? 'var(--text-muted)' : 'var(--text-primary)' }}>
+                        {isMissing ? 'Not Found' : `₹${Number(r.portalAmount || 0).toLocaleString('en-IN')}`}
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        {hasDiff ? (
+                          <span className={`cell-variance-badge ${Math.abs(r.diffAmount || 0) <= tolerance ? 'near' : 'mismatch'}`}>
+                            {r.diffAmount > 0 ? `+₹${r.diffAmount.toLocaleString('en-IN')}` : `₹${r.diffAmount.toLocaleString('en-IN')}`}
+                          </span>
+                        ) : (
+                          <span className="cell-variance-badge exact">
+                            ₹0.00
+                          </span>
+                        )}
+                      </td>
+                      <td>{getStatusBadge(r.category)}</td>
+                      <td>
+                        <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                          {r.itcEligibility || 'Eligible (Sec 16)'}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        {isMissing ? (
+                          <button 
+                            className="btn btn-secondary text-xs" 
+                            style={{ padding: '3px 8px', color: '#0F5A47', borderColor: 'var(--brand-border)' }}
+                            onClick={() => onOpenVendorFollowup?.({
+                              supplierName: r.supplierName,
+                              supplierGstin: r.supplierGstin,
+                              customerName: "Client Company",
+                              invoiceNo: r.invoiceNo,
+                              invoiceDate: r.invoiceDate,
+                              grandTotal: r.bookAmount,
+                              issueTag: "Missing in 2B",
+                              issueDescription: "Invoice in books but unfiled in GSTR-1 by vendor."
+                            })}
+                            title="Chase vendor on WhatsApp"
+                          >
+                            <Send size={11} />
+                            <span>Follow-up</span>
+                          </button>
+                        ) : hasDiff && Math.abs(r.diffAmount || 0) <= tolerance ? (
+                          <button
+                            className="btn btn-secondary text-xs"
+                            style={{ padding: '3px 8px', color: 'var(--brand)' }}
+                            onClick={() => onShowToast?.(`Accepted ₹${r.diffAmount} round-off for ${r.invoiceNo}`)}
+                            title="Accept round-off tolerance"
+                          >
+                            <Check size={11} />
+                            <span>Accept</span>
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Verified</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

@@ -409,6 +409,7 @@ export default function ClientWorkspaceView({
             onReject={onRejectInvoice}
             onInspect={onInspectInvoice}
             getPattern={getPattern}
+            onShowToast={onShowToast}
           />
         </div>
       )}
@@ -426,6 +427,7 @@ export default function ClientWorkspaceView({
           <ReconciliationView 
             reconData={RECONCILIATION_DATA}
             onOpenReconModal={() => {}}
+            onShowToast={onShowToast}
           />
         </div>
       )}

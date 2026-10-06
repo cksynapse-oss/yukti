@@ -23,6 +23,7 @@ import InvestorDemoBar from './components/InvestorDemoBar';
 import BankStatementAutomationView from './components/BankStatementAutomationView';
 import TallyConnectorModal from './components/TallyConnectorModal';
 import ClientWorkspaceView from './components/ClientWorkspaceView';
+import CommandPalette from './components/CommandPalette';
 
 import { useVendorPatterns } from './hooks/useVendorPatterns';
 import { 
@@ -75,11 +76,17 @@ export default function App() {
   const [isReconModalOpen, setIsReconModalOpen] = useState(false);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [isTallyModalOpen, setIsTallyModalOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
-  // Global hotkey for pitch deck ('P' or 'p') and intelligence drawer ('I' or 'i')
+  // Global hotkeys: ⌘K (Command Palette), P (pitch deck), I (intelligence drawer)
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setIsCommandPaletteOpen(prev => !prev);
+        return;
+      }
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
         return;
       }
@@ -415,6 +422,9 @@ export default function App() {
           onOpenTallyConnector={() => setIsTallyModalOpen(true)}
           onResetDemoData={handleResetDemoData}
           onOpenIntelligence={() => setIsIntelligenceOpen(prev => !prev)}
+          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+          activeClient={activeClient}
+          onClearActiveClient={() => setActiveClient(null)}
           isBackendConnected={isBackendConnected}
         />
 
@@ -468,6 +478,7 @@ export default function App() {
                   onOpenVendorFollowup={(item) => setFollowupItem(item)}
                   getPattern={getPattern}
                   onNavigateTab={(tab) => setActiveTab(tab)}
+                  onShowToast={showToast}
                 />
               )}
 
@@ -480,6 +491,7 @@ export default function App() {
                   reconData={reconData}
                   onOpenVendorFollowup={(item) => setFollowupItem(item)}
                   onOpenReconModal={() => setIsReconModalOpen(true)}
+                  onShowToast={showToast}
                 />
               )}
 
@@ -587,6 +599,27 @@ export default function App() {
         }}
       />
 
+      {/* Global Command Palette (Hotkey: ⌘K) */}
+      <CommandPalette 
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onNavigateTab={(tab) => {
+          setActiveClient(null);
+          setActiveTab(tab);
+        }}
+        clients={clients}
+        onSelectClient={(client) => {
+          setActiveClient(client);
+        }}
+        reviewItems={reviewItems}
+        onInspectItem={(item) => setInspectingItem(item)}
+        onOpenUpload={() => setIsUploadModalOpen(true)}
+        onOpenReconModal={() => setIsReconModalOpen(true)}
+        onOpenTallyConnector={() => setIsTallyModalOpen(true)}
+        onOpenIntelligence={() => setIsIntelligenceOpen(true)}
+        onOpenDeck={() => setIsDeckOpen(true)}
+      />
+
       {/* Desktop Tally Sync Connector Modal */}
       {isTallyModalOpen && (
         <TallyConnectorModal 
@@ -611,12 +644,23 @@ export default function App() {
         onShowToast={showToast}
       />
 
-      {/* Global Toast Notification */}
+      {/* Global Accessible Toast Notification with Micro-Interaction */}
       {toast && (
-        <div className="toast-container">
+        <div className="toast-container" role="status" aria-live="polite">
           <div className="toast-item">
-            <Sparkles size={14} className="text-green" />
-            <span>{toast}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '9px', minWidth: 0 }}>
+              <Sparkles size={15} style={{ color: '#10B981', flexShrink: 0 }} aria-hidden="true" />
+              <span style={{ fontSize: '13px', lineHeight: 1.4 }}>{toast}</span>
+            </div>
+            <button 
+              onClick={() => setToast(null)}
+              className="toast-close-btn"
+              aria-label="Dismiss notification"
+              title="Dismiss"
+            >
+              ✕
+            </button>
+            <div className="toast-progress-bar" />
           </div>
         </div>
       )}

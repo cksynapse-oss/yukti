@@ -19,6 +19,7 @@ export default function ClientOverview({
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [copiedArn, setCopiedArn] = useState(null);
+  const [density, setDensity] = useState('compact');
 
   // Normalize & deduplicate clients
   const normalizedClients = useMemo(() => {
@@ -237,21 +238,58 @@ export default function ClientOverview({
             </button>
           </div>
 
-          {/* Right side — search + add */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Right side — density + search + add */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Density Toggle */}
+            <div style={{ display: 'flex', background: 'var(--bg-subtle)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '2px' }}>
+              <button
+                onClick={() => setDensity('compact')}
+                style={{
+                  border: 'none',
+                  background: density === 'compact' ? '#FFFFFF' : 'transparent',
+                  color: density === 'compact' ? 'var(--text-primary)' : 'var(--text-muted)',
+                  padding: '3px 7px',
+                  borderRadius: '4px',
+                  fontSize: '10.5px',
+                  fontWeight: density === 'compact' ? 600 : 500,
+                  cursor: 'pointer'
+                }}
+                title="Compact density"
+              >
+                Compact
+              </button>
+              <button
+                onClick={() => setDensity('comfortable')}
+                style={{
+                  border: 'none',
+                  background: density === 'comfortable' ? '#FFFFFF' : 'transparent',
+                  color: density === 'comfortable' ? 'var(--text-primary)' : 'var(--text-muted)',
+                  padding: '3px 7px',
+                  borderRadius: '4px',
+                  fontSize: '10.5px',
+                  fontWeight: density === 'comfortable' ? 600 : 500,
+                  cursor: 'pointer'
+                }}
+                title="Comfortable density"
+              >
+                Comfortable
+              </button>
+            </div>
+
             <div className="search-input-wrapper">
               <Search size={14} className="search-icon" />
               <input
                 type="text"
                 placeholder="Search client, GSTIN..."
+                aria-label="Search clients by business name or GSTIN"
                 value={searchTerm}
                 onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                 className="search-input"
-                style={{ width: '220px' }}
+                style={{ width: '200px' }}
               />
             </div>
             {onOpenAddClient && (
-              <button className="btn btn-primary" style={{ fontSize: '12px', padding: '6px 12px' }} onClick={onOpenAddClient}>
+              <button className="btn btn-primary" style={{ fontSize: '11.5px', padding: '5px 11px' }} onClick={onOpenAddClient}>
                 <Users size={13} /> Add Client
               </button>
             )}
@@ -260,10 +298,10 @@ export default function ClientOverview({
 
         {/* Table */}
         <div className="table-responsive">
-          <table className="data-table">
+          <table className={`data-table ${density} table-sticky-header`}>
             <thead>
               <tr>
-                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('name')}>
+                <th className="table-sticky-col" style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('name')}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>Client Business <SortIcon field="name" /></span>
                 </th>
                 <th>GSTIN</th>
@@ -295,7 +333,7 @@ export default function ClientOverview({
                   style={{ cursor: 'pointer' }}
                   title="Click to open Client 360 Workspace"
                 >
-                  <td>
+                  <td className="table-sticky-col">
                     <div style={{ fontWeight: 600, color: 'var(--brand)', fontSize: '13px' }}>{c.name}</div>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '1px' }}>{c.primaryContact}</div>
                   </td>
